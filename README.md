@@ -1,6 +1,6 @@
 # IICS Design Reporting Tools
 
-This project contains set of Tools to provide reporting on Exported asses packages from Informatica IICS
+This project contains set of tools to provide reporting on exported assets packages from Informatica IICS
 
 ![Designs Report](doc/images/IICS_DesignsReport.png "Designs Report")
 
