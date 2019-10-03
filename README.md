@@ -60,5 +60,5 @@ basex -c "CREATE DATABASE IICS_ICLAB_SRC_2019_07_08 /Users/jbrazda/git/icrt_comm
 - improve documentation
 - improve dependency tree rendering
 - provide graphical view of dependency graph Design objects
-- provide page to upload the
+- provide page to upload the exported package to create DB
 - provide script targets to incorporate this tool during Designs Migration from different Stage Environments
