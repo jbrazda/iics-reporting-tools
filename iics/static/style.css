@@ -1,0 +1,100 @@
+html,body,.ui-widget,th,td,p,span,button,input,select,textarea {
+    font-size: 12px;
+    font-size-adjust: none;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-family: Arial, Helvetica, Verdana, sans-serif;
+}
+
+table.display {
+    margin: auto 0;
+    margin-right:auto;
+    margin-left:0px;
+    width: fit-content;
+}
+
+#object_list {
+    width: auto;
+}
+
+.noWrapLabel {
+    white-space: nowrap;
+}
+
+/* Clear floats after the columns */
+.summaryContainer:after {
+  content: "";
+  display: inline-block;
+  clear: both;
+}
+
+/* Responsive layout - makes the Summary columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .summaryColumn {
+    width: 100%;
+  }
+}
+
+/* Create horizontal equal columns that floats next to each other */
+.summaryColumn {
+  float: left;
+  padding: 5px;
+}
+
+.reportSection {
+    padding: 5px;
+    margin: 10px ;
+}
+
+code {
+  font-family: "Consolas", "Ubuntu Mono", Menlo, monospace;
+  border: 1px solid #E3E3FF;
+  border-radius: 3px;
+  padding: 0 4px 0 4px;
+  margin: 0 2px 0 2px;
+  font-size: 90%;
+}
+
+pre {
+  font-family: "Consolas", "Ubuntu Mono", Menlo, monospace;
+  font-size: 90%;
+}
+
+.simpleTable {
+    border-collapse: collapse
+}
+
+.simpleTable td, .simpleTable th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.simpleTable th {
+        font-weight: bold;
+}
+.simpleTable tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+
+.simpleTable tr:hover {
+    background-color: #ddd;
+}
+
+img {
+    vertical-align: middle;
+}
+
+.shellLibNameImage {
+    width: 20px;
+    height: 20px;
+}
+
+.shellLibNameMargin {
+    margin-left: 3px;
+    white-space: pre;
+}
+
+.tableWrapperFitContents {
+  width: fit-content;
+}

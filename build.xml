@@ -1,0 +1,212 @@
+<!-- ====================================================================== 
+     Aug 29, 2019 12:35:05 PM                                                        
+
+     project Informatica Cloud Custom Fault Alert Service Build   
+     description
+                   
+     jbrazda                                                                
+     ====================================================================== -->
+<project name="IICS Reporting Build Script" default="help" basedir=".">
+    <description>
+            IICS Reportinmg Tools Build Script
+    </description>
+
+    <!-- Global properties -->
+
+    <condition property="isUnix">
+        <os family="unix" />
+    </condition>
+
+    <condition property="isWindows">
+        <os family="windows" />
+    </condition>
+
+    <condition property="exec.ext" value="sh">
+        <os family="unix" />
+    </condition>
+
+    <condition property="exec.ext" value="bat">
+        <os family="windows" />
+    </condition>
+
+    <condition property="shell" value="bash">
+        <os family="unix" />
+    </condition>
+
+    <condition property="shell" value="cmd.exe">
+        <os family="windows" />
+    </condition>
+
+    <condition property="shell.options" value="-c">
+        <os name="Mac OS X" />
+    </condition>
+
+    <condition property="shell.open" value=" open ">
+        <os name="Mac OS X" />
+    </condition>
+
+    <property name="shell.open" value="" />
+
+    <condition property="shell.options" value="-c">
+        <os family="unix" />
+    </condition>
+
+    <condition property="shell.options" value="/c">
+        <os family="windows" />
+    </condition>
+
+	
+
+    <target name="-init" unless="ems.initialized">
+    	<property file="build.properties" />
+    	<property file="${iics.reporting.config}" />
+    	        
+    	<property environment="env" /> 
+    	
+    	<path id="basex-PATH">
+    	  <pathelement path="${env.PATH}"/>
+    	  <pathelement path="${env.Path}"/>
+    	  <pathelement location="${iics.reporting.basex.home}/bin"/>	
+    	</path>
+    	<property name="basex.PATH" refid="basex-PATH"/>     
+    	
+        <!-- Basex Installation Checks-->
+        <condition property="basex.cmd.available" value="true">
+        	<or>
+        		<available file="basex" filepath="${basex.PATH}" property="basex.present"/>
+        		<available file="basex.bat" filepath="${basex.PATH}" property="basex.present"/>
+        	</or>
+        </condition>
+    	<condition property="basex.basexgui.available" value="true">
+    		<or>
+                <available file="basexgui" filepath="${basex.PATH}" property="basexgui.present"/>
+                <available file="basexgui.bat" filepath="${basex.PATH}" property="basexgui.present"/>
+            </or>
+        </condition>
+    	<condition property="basex.basexhttp.available" value="true">
+            <or>
+                <available file="basexhttp" filepath="${basex.PATH}" property="basexhttp.present"/>
+                <available file="basexserver.bat" filepath="${basex.PATH}" property="basexhttp.present"/>
+            </or>
+        </condition>
+    	<condition property="basex.basexhttpstop.available" value="true">
+            <or>
+                <available file="basexhttpstop" filepath="${basex.PATH}" property="basexhttpstop.present"/>
+                <available file="basexhttpstop.bat" filepath="${basex.PATH}" property="basexhttpstop.present"/>
+            </or>
+        </condition>
+    </target>
+
+
+    <target name="-env.info" unless="env.info.displayed" depends="-init">
+        <echo level="info">========================================</echo>
+        <echo level="info">==       IICS Reporting Build         ==</echo>
+        <echo level="info">========================================</echo>
+        <echo level="info">Java Version:    ${java.runtime.version}</echo>
+        <echo level="info">Java Home:       ${java.home}</echo>
+        <echo level="info">Ant Version:     ${ant.version}</echo>
+        <echo level="info">Ant Lib:         ${ant.library.dir}</echo>
+        <echo level="info">eclipse.home:    ${eclipse.home}</echo>
+        <echo level="info">shell:           ${shell}</echo>
+        <echo level="info">os.name:         ${os.name}</echo>
+        <echo level="info">os.version:      ${os.version}</echo>
+        <echo level="info">os.arch:         ${os.arch}</echo>
+        <echo level="info">user.name:       ${user.name}</echo>
+        <echo level="info">user.dir:        ${user.dir}</echo>
+        <echo level="info">user.home:       ${user.home}</echo>
+        <echo level="info">env.HOME:        ${env.HOME}</echo>
+        <echo level="info">env.LANG:        ${env.LANG}</echo>
+        <echo level="info">env.SHELL:       ${env.SHELL}</echo>
+        <echo level="info">env.PATH:        ${env.PATH}</echo>
+        <echo level="info">env.JAVA_HOME:   ${env.JAVA_HOME}</echo>
+    	<echo level="info">basex.PATH:      ${basex.PATH}</echo>
+    	<echo level="info">Basex Available: ${basex.basexhttp.available}</echo>
+        <echo level="info">iics.reporting.basex.home:   ${iics.reporting.basex.home}</echo>
+        <echo level="info">========================================</echo>
+        <property name="env.info.displayed" value="true" />
+    </target>
+
+
+    <target name="help" description="help - describes how to use this script" depends="-env.info">
+        <echo level="info">This ant script provides set of IICS Bundle Build</echo>
+        <echo level="info">Read the doc/README.MD or README.html for more details</echo>
+        <echo level="info">use ant -projecthelp to see available targets</echo>
+        <property name="help.file" value="${basedir}/README.html" />
+        <echo level="info">${shell.open} ${help.file}</echo>
+        <exec executable="${shell}" spawn="yes">
+            <arg value="${shell.options}" />
+            <arg line="'${shell.open} ${help.file}'" />
+        </exec>
+    </target>
+
+
+
+    <target name="basex.download" depends="-env.info" description="Download Basex">
+        <!-- Download OS Specific version of the tool-->
+        <echo level="info">Basex Available: ${basex.cmd.available}</echo>
+        <echo level="info">Downloading: ${basex.download.url}</echo>
+        <get src="${basex.download.url}" dest="${iics.reporting.downloads.dir}" usetimestamp="true"   />
+    </target>
+    
+    
+    <target name="configure" unless="iics.reporting.basex.home" 
+    	depends="-env.info"
+    	description="Configure Reporting Tool">
+        <echo level="info">IICS Reporting Configuration:</echo>
+        
+    	<input defaultvalue="${default.iics.reporting.downloads.dir}" message="Download Basex To: " addproperty="iics.reporting.downloads.dir"></input>
+        <input defaultvalue="${default.iics.reporting.basex.home}" message="Install Basex To:" addproperty="iics.reporting.basex.home"></input>    	        
+    	<echoproperties  destfile="${iics.reporting.config}">
+    	  <propertyset>
+    	    <propertyref prefix="iics.reporting."/>
+    	  </propertyset>
+    	</echoproperties>
+    	<echo level="info">Configuration file written to ${iics.reporting.config}</echo>
+    </target>
+    
+	<!-- ================================= 
+          target: Install Base X Database and Tools              
+         ================================= -->
+    <target name="basex.install" depends="basex.download" description="Installs Basex DB and Tools">
+          <unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
+    </target>
+	
+	<target name="basex.run" depends="-env.info" description="Run Basex HTTP Server">
+	   <exec executable="${iics.reporting.basex.home}/bin/basexhttp" spawn="true"  dir="${iics.reporting.basex.home}" >
+	     <env key="JAVA_HOME" value="${basex.java_home}" />
+	   	 <env key="PATH" value="${basex.PATH}" />
+	   </exec>
+	</target>
+	
+	<target name="basex.stop" depends="-env.info" description="Stop Basex HTTP Server">
+       <exec executable="${iics.reporting.basex.home}/bin/basexhttpstop"  dir="${iics.reporting.basex.home}" >
+         <env key="JAVA_HOME" value="${basex.java_home}" />
+         <env key="PATH" value="${basex.PATH}" />
+       </exec>
+    </target>
+	
+	<!-- ================================= 
+          target: name              
+         ================================= -->
+    <target name="basex.deploy.iics" depends="-env.info" 
+    	if="basex.basexhttp.available"
+    	description="Deploys IICS Reporting pages to BaseX Http Server to basex_home/webapp/iics">
+        <copy todir="${iics.reporting.basex.home}/webapp" verbose="true" overwrite="true">
+            <fileset dir="${basedir}">
+                <include name="iics/**"/>
+            </fileset>
+        </copy>
+    </target>
+	
+	
+	<target name="projec.update.from.basex" depends="-env.info" 
+        if="basex.basexhttp.available"
+        description="Updates iics reporting modules and sources from basex http server webapp/iics dir ">
+        <copy todir="${basedir}" verbose="true" overwrite="true">
+            <fileset dir="${iics.reporting.basex.home}/webapp">
+                <include name="iics/**"/>
+            </fileset>
+        </copy>
+    </target>
+    
+</project>

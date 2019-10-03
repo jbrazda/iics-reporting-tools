@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
+<g>
+	<g>
+		<circle fill="#666666" cx="10" cy="10" r="10"/>
+	</g>
+	<g>
+		<circle fill="#ADD6FF" cx="10" cy="10" r="7.5"/>
+	</g>
+	<g>
+		<g>
+			<path fill="#2473E4" d="M10,11.2c-0.7,0-1.2-0.5-1.2-1.2c0-0.7,0.5-1.2,1.2-1.2c0.7,0,1.2,0.5,1.2,1.2
+				C11.2,10.7,10.7,11.2,10,11.2z M14.8,10.8V9.2h-1.3c-0.1-0.4-0.2-0.8-0.5-1.1l0.9-0.9l-1.1-1.1L12,7c-0.4-0.2-0.8-0.4-1.2-0.5
+				V5.2H9.2v1.3C8.8,6.6,8.4,6.8,8.1,7L7.2,6.1L6.1,7.2L7,8.1C6.8,8.4,6.6,8.8,6.5,9.2H5.2v1.6h1.3c0.1,0.4,0.2,0.8,0.5,1.2
+				l-0.9,0.9L7.1,14l0.9-0.9c0.4,0.2,0.7,0.4,1.1,0.5v1.2h1.6v-1.3c0.4-0.1,0.8-0.2,1.1-0.5l0.9,0.9l1.1-1.1l-0.9-0.9
+				c0.2-0.4,0.4-0.8,0.5-1.2L14.8,10.8L14.8,10.8z"/>
+			<circle fill="none" stroke="#3399FF" stroke-width="0.7329" stroke-miterlimit="10" cx="10" cy="10" r="1.4"/>
+		</g>
+	</g>
+</g>
+</svg>
