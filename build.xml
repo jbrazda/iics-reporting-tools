@@ -163,12 +163,20 @@
     	</echoproperties>
     	<echo level="info">Configuration file written to ${iics.reporting.config}</echo>
     </target>
+	
+	<target name="install"
+		description="Install Tools and Deploy IICS Reporing App"
+		depends="configure,basex.install,basex.deploy.iics">
+	
+	</target>
     
 	<!-- ================================= 
           target: Install Base X Database and Tools              
          ================================= -->
-    <target name="basex.install" depends="basex.download" description="Installs Basex DB and Tools">
-          <unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
+    <target name="basex.install" depends="basex.download" 
+    	unless="" 
+    	description="Installs Basex DB and Tools">
+        <unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
     </target>
 	
 	<target name="basex.run" depends="-env.info" description="Run Basex HTTP Server">
@@ -197,6 +205,7 @@
             </fileset>
         </copy>
     </target>
+	
 	
 	
 	<target name="projec.update.from.basex" depends="-env.info" 

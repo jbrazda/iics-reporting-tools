@@ -37,7 +37,8 @@ declare function imf:getDesignByGuid (
 };
 
 (:~
- : Function returns file repository data resolved by the object name
+ : Function returns file repository document resolved by the IPD object name and optional Type;
+ : Object name is not gauaranteed to be unique for different types so It is recommended to use a type to avoid ambiguous results
  :
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $objectType as xs:string? optional object Type can be one of the following (processobject, connection, screenflow, process, businesssconnector)
@@ -57,7 +58,7 @@ declare function imf:getDesignByObjectName (
 
 
 (:~
- : Function resolves catalog entry for Connector by UUID and Name
+ : Function resolves repository Document  entry for Connector by UUID and Name
  :
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $uuid as xs:string Connector UUID
@@ -77,7 +78,14 @@ declare function imf:getConnectorByUid (
 };
 
 
-
+(:~
+ : Function Calculates IPD Design Object Dependdencies
+ : TODO: Implement Support for TaskFlow Dependencies
+ :
+ : @param $database as document-node()* PID Document Collection repository with file descriptors
+ : @param $document as node()? IPD Design Document Instance to analyze for Dependencies
+ : @return empty set if file is not found in ther repo or Calatog Instance of the repo file
+ :)
 declare function imf:getObjectDependencies (
    $database as document-node()*, 
    $document as node()?
@@ -98,7 +106,14 @@ declare function imf:getObjectDependencies (
      </dependencies>
 };
 
-
+(:~
+ : Function Calculates IPD Process Object Dependencies
+ : This function is recursive
+ :
+ : @param $database as document-node()* PID Document Collection repository with file descriptors
+ : @param $document as node()? IPD Design Document Instance to analyze for Dependencies
+ : @return empty set if file is not found in ther repo or Calatog Instance of the repo file
+ :)
 declare function imf:getPODependencies (
    $database as document-node()*, 
    $design as node()?
@@ -139,7 +154,8 @@ declare function imf:getPODependencies (
 (:~
  : Function Provides dependency tree for Designs in the Guides and Processes
  : This is a recursive function that must prvent infite loop when cyclical dependensies occur, it uses $parentFlows
- : as a stack of parent references which is is used to break out of cyclyc dependencies
+ : as a stack of parent references which is is used to break out of cyclic dependencies
+ :
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $subflowPath as xs:string  Subflow name (guide or process)
  : @param $parentFlows as xs:string  Parent flows stack mainteind during recursion 
@@ -162,44 +178,54 @@ declare function imf:getDesignDependencies (
                 return
                  switch  ( true() ) 
                    case (count($objectDesign) = 0 and $objectContainer = '$po') 
-                     return <warning type="Missing Object Reference">Could not find object reference to {$referenceTo}</warning> 
-                   case (count($objectDesign) = 1) return imf:getPODependencies($database,$objectDesign)
-                   case (count($objectDesign) > 1) return <warning type="Ambiguous Object Reference">Found more than 1 object with name {$referenceTo} 
-                                    {string-join(for $item in $objectDesign return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
-                                  </warning> 
-                   default return
-                     let $connectionObject := imf:getDesignByObjectName($database,'connection',$objectContainer)
-                     let $connGuid         := $connectionObject/rep:GUID/text() 
-                     let $documentUri      := if (empty($connectionObject)) then () else db:path($connectionObject)
+                     return 
+                        <warning type="Missing Object Reference">Could not find object reference to {$referenceTo}</warning> 
+                   case (count($objectDesign) = 1) 
+                     return 
+                        imf:getPODependencies($database,$objectDesign)
+                   case (count($objectDesign) > 1) 
+                     return 
+                        <warning type="Ambiguous Object Reference">Found more than 1 object with name {$referenceTo} 
+                           {string-join(for $item in $objectDesign return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
+                        </warning> 
+                  default 
                      return
-                     <dependency objectName="{$objectContainer}" 
-                      referenceFrom="{$name}" 
-                      referenceTo="{$referenceTo}" 
-                      fromGuid="{$guid}" toGuid="{$connGuid}" 
-                      referenceType="Connection:ProcessObject"
-                      docUri="{$documentUri}"/>
-                   
-    (: build distinct set of connections used by the process:)
-    let $connections := for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectList"]
-                        let $referenceTo     := $field/*:options/*:option[@name="referenceTo"]/text()
-                        let $conName := substring-before($referenceTo,":")
-                        where $conName != "$po"
-                        return $conName
-    (:getting create step connection dependencies:)
-    let $createStepConnections :=  for $object in $design//*:create/*:entityName/text()
+                        let $connectionObject := imf:getDesignByObjectName($database,'connection',$objectContainer)
+                        let $connGuid         := $connectionObject/rep:GUID/text() 
+                        let $documentUri      := if (empty($connectionObject)) then () else db:path($connectionObject)
+                        return
+                        <dependency objectName="{$objectContainer}" 
+                           referenceFrom="{$name}" 
+                           referenceTo="{$referenceTo}" 
+                           fromGuid="{$guid}" toGuid="{$connGuid}" 
+                           referenceType="Connection:ProcessObject"
+                           docUri="{$documentUri}"/>
+                  
+   (: build distinct set of connections used by the process:)
+   let $connections := 
+      for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectList"]
+         let $referenceTo     := $field/*:options/*:option[@name="referenceTo"]/text()
+         let $conName := substring-before($referenceTo,":")
+      where $conName != "$po"
+      return $conName
+   (:getting create step connection dependencies:)
+   let $createStepConnections :=  
+      for $object in $design//*:create/*:entityName/text()
         let $conName := substring-before($object,":")
-        return $conName
+      return $conName
  
-    let $connectionDependencies :=  for $connectionName in distinct-values(($connections,$createStepConnections)) 
-             return
-             imf:getConnectionDependencies($database,$designFile,$connectionName)
-             
-    return
-          (  $objectDependencies
-             ,imf:getSubflowDependencies($database,$designFile,$parentFlows)
-             ,$connectionDependencies
-             ,imf:getServiceDependencies($database,$designFile,$parentFlows)
-          )
+   let $connectionDependencies :=  
+      for $connectionName in distinct-values(($connections,$createStepConnections)) 
+      return
+      imf:getConnectionDependencies($database,$designFile,$connectionName)
+      
+   return
+   (   
+      $objectDependencies
+      ,imf:getSubflowDependencies($database,$designFile,$parentFlows)
+      ,$connectionDependencies
+      ,imf:getServiceDependencies($database,$designFile,$parentFlows)
+   )
 };
 
 
@@ -209,7 +235,7 @@ declare function imf:getDesignDependencies (
  : Function Provides dependencies on Connections, reference to a connector used by the connection
  
  Connector Type examples
- 
+   
     <javaConnector xmlns="http://schemas.informatica.com/appmodules/screenflow/2014/04/avosConnectors.xsd"
            agentOnly="true"
            plugin="Camel"
@@ -254,12 +280,17 @@ declare function imf:getConnectionDependencies (
     
     let $referedCon     := imf:getDesignByObjectName($database,"connection",$connectionName)
     let $warnings       := switch (count($referedCon ))
-                             case 0 return <warning type="Missing Connection Reference">Counld not find a connection Definition '{$connectionName}'</warning>
-                             case 1 return ()
-                             default return <warning type="Ambiguous Reference">Found more than one Connection with Name '{$connectionName}'
-                               {string-join(for $item in $referedCon return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
-                             </warning>
-                             
+               case 0 
+                  return 
+                     <warning type="Missing Connection Reference">Counld not find a connection Definition '{$connectionName}'</warning>
+               case 1 
+                  return ()
+               default 
+                  return 
+                     <warning type="Ambiguous Reference">Found more than one Connection with Name '{$connectionName}'
+                        {string-join(for $item in $referedCon return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
+                     </warning>
+                     
     let $connectionName := $referedCon[1]/rep:Name/text()
     let $connectionGuid := $referedCon[1]/rep:GUID/text()
     let $design         := $referedCon[1]/rep:Entry/* 
@@ -353,7 +384,7 @@ declare function imf:getConnectionDependencies (
    </callProcess>
    </code>
  : This is a recursive function that must prvent infinite loop when cyclycal dependensies occur it uses $parentFlows
- : as a stack of parent references which is is used to break out oif cyclyc dependencies
+ : as a stack of parent references which is is used to break out of cyclic dependencies
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $subflowPath as xs:string  Subflow name (guide or process)
  : @param $parentFlows as xs:string  Parent flows stack mainteind during recursion 
@@ -393,12 +424,18 @@ declare function imf:getSubflowDependencies (
                  {
                   imf:getDesignDependencies($database,$refFlow,$parentStack)
                  }
-                 {switch (count($refFlow))
-                             case 0 return <warning type="Missing SubFlow reference">Counld not find a Sub Flow Definition '{$referenceTo}' guid:{$toGuid} </warning>
-                             case 1 return ()
-                             default return <warning type="Ambiguous Reference">Found more than one SubFlow with ID '{$toGuid}'
-                               {string-join(for $item in $refFlow return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
-                             </warning>
+                 {
+                  switch (count($refFlow))
+                     case 0 
+                        return 
+                        <warning type="Missing SubFlow reference">Counld not find a Sub Flow Definition '{$referenceTo}' guid:{$toGuid} </warning>
+                     case 1 
+                        return ()
+                     default 
+                        return 
+                        <warning type="Ambiguous Reference">Found more than one SubFlow with ID '{$toGuid}'
+                           {string-join(for $item in $refFlow return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
+                        </warning>
                  }
               </dependency>         
              
@@ -444,8 +481,7 @@ declare function imf:getServiceDependencies (
             docUri="{$docUri}">
             {if (empty($serviceDesign)) then () else  imf:getDesignDependencies($database,$serviceDesign,$distinctSubflowsMinusParent) }
             {if (empty($serviceDesign) and empty($serviceGUID)) then <info>This Service reference is either System Service or Connection Service</info> else()}
-            {if (empty($serviceDesign) and not(empty($serviceGUID))) then <warning type="Missing Object Reference">Could not find reference to process Service {$serviceName} guid:{$serviceGUID}</warning> else()}
-            
+            {if (empty($serviceDesign) and not(empty($serviceGUID))) then <warning type="Missing Object Reference">Could not find reference to Process as a Service {$serviceName} guid:{$serviceGUID}</warning> else()}
         </dependency>
     return 
     $dependencies
@@ -454,7 +490,7 @@ declare function imf:getServiceDependencies (
 
 
 (:~
- : Function generates Impact for Service It can be automated step or Process
+ : Function generates Impact of a design used as as Service or Sub-proces or Embedded Guide 
  :
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $fdesignDoc as node()?  Design Object to check impact for
@@ -676,7 +712,7 @@ declare function imf:getConnectorImpact (
 
 
 (:~
- : Function generates Impact (Used By) analysis data for IPD process design objects
+ : Function generates Impact (Used By) analysis data for IPD Process Object Designs
  :
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $fdesignDoc as node()?  Design Object to check impact for

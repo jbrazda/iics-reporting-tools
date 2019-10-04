@@ -25,31 +25,40 @@ declare namespace db     = "http://basex.org/modules/db";
 declare namespace rest   = "http://exquery.org/ns/restxq";
 
 
-declare variable $mhtml:IPD_TYPES := map { "application/xml+processobject": "Process Object",
-                                            "application/xml+connection": "Connection",
-                                            "application/xml+screenflow": "Guide",
-                                            "application/xml+process": "Process",
-                                            "application/xml+businesssconnector": "Service Connector",
-                                            "application/xml+taskflow": "Task Flow"
-                                          };
+declare variable $mhtml:IPD_TYPES := 
+    map { 
+        "application/xml+processobject": "Process Object",
+        "application/xml+connection": "Connection",
+        "application/xml+screenflow": "Guide",
+        "application/xml+process": "Process",
+        "application/xml+businesssconnector": "Service Connector",
+        "application/xml+taskflow": "Task Flow"
+        };
+
+(:
+declare variable $mhtml:REF_TYPE_ICONS := 
+    map {
+        "",""
+        }
+:)
 
 declare variable $mhtml:URL_REST_PREFIX := "/rest";
 
 (:~
  : Renders Dependency tree as Dependecy/Impact report structure
  : such as
- <dependencies object="Setup_Logging_DB" guid="akOVKXc0aE7lAct0X7uEMo">
-  <dependency objectName="Setup Logging DB" referenceFrom="Setup_Logging_DB" referenceTo="SP-Setup-Logging-DB" fromGuid="akOVKXc0aE7lAct0X7uEMo" toGuid="jSu7p8fQuE8dQDuX3vRk6v" referenceType="Process" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/Logging/Setup/SP-Setup-Logging-DB.PROCESS.xml">
-    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiResponse" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
-    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiDataAccessRequest" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
-    <dependency objectName="SP-Setup-Logging-DB" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml">
-      <dependency objectName="DataAccessService" referenceFrom="DataAccessService" referenceTo="DataAccessService" fromGuid="jhXRGp8HGy8fOjJy57yhy1" toGuid="cZ66760oF8pjwt5OEx7AY1" referenceType="Connector" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_SERVICE_CONNECTOR.xml" uuid="93d7509e-96fb-4872-b8c1-41f382c1811f"/>
-    </dependency>
-    <dependency objectName="execMultiSQL" referenceFrom="jSu7p8fQuE8dQDuX3vRk6v" referenceTo="execMultiSQL" fromGuid="SP-Setup-Logging-DB" toGuid="" referenceType="Service" docUri="">
-      <info>This Service reference is either System Service or Connection Service</info>
-    </dependency>
-  </dependency>
-</dependencies>
+ : <dependencies object="Setup_Logging_DB" guid="akOVKXc0aE7lAct0X7uEMo">
+ :  <dependency objectName="Setup Logging DB" referenceFrom="Setup_Logging_DB" referenceTo="SP-Setup-Logging-DB" fromGuid="akOVKXc0aE7lAct0X7uEMo" toGuid="jSu7p8fQuE8dQDuX3vRk6v" referenceType="Process" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/Logging/Setup/SP-Setup-Logging-DB.PROCESS.xml">
+ :    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiResponse" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
+ :    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiDataAccessRequest" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
+ :    <dependency objectName="SP-Setup-Logging-DB" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml">
+ :      <dependency objectName="DataAccessService" referenceFrom="DataAccessService" referenceTo="DataAccessService" fromGuid="jhXRGp8HGy8fOjJy57yhy1" toGuid="cZ66760oF8pjwt5OEx7AY1" referenceType="Connector" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_SERVICE_CONNECTOR.xml" uuid="93d7509e-96fb-4872-b8c1-41f382c1811f"/>
+ :    </dependency>
+ :    <dependency objectName="execMultiSQL" referenceFrom="jSu7p8fQuE8dQDuX3vRk6v" referenceTo="execMultiSQL" fromGuid="SP-Setup-Logging-DB" toGuid="" referenceType="Service" docUri="">
+ :      <info>This Service reference is either System Service or Connection Service</info>
+ :    </dependency>
+ :  </dependency>
+ : </dependencies>
  : @param $guid as xs:string? IICS internal GUID for the object
  : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
  : @return empty set if file is not found in the repository or a document Instance of design with metadata
@@ -76,7 +85,7 @@ declare function mhtml:DependencyTree (
  : 
  : @param $node as xs:string? IICS internal GUID for the object
  : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
- : @returns Label specific to dependency or Impact Tree Node
+ : @returns html nodes
  :)
 declare function mhtml:DepenencyTreeNodeLabel (
     $node as node()*,
@@ -91,10 +100,19 @@ declare function mhtml:DepenencyTreeNodeLabel (
 
 (:~
  : Renders Dependency tree as Dependecy/Impact report structure
- : 
+ : Dependency Example
+ :  <dependency 
+ :     objectName="DataAccessService" 
+ :     referenceFrom="DataAccessService" 
+ :     referenceTo="DataAccessService" 
+ :     fromGuid="jhXRGp8HGy8fOjJy57yhy1" 
+ :     toGuid="cZ66760oF8pjwt5OEx7AY1" 
+ :     referenceType="Connector" 
+ :     connectorType="businessConnector" 
+ :     docUri="Explore/DAS/DataAccessService.AI_SERVICE_CONNECTOR.xml" uuid="93d7509e-96fb-4872-b8c1-41f382c1811f"/>
  : @param $node as xs:string? IICS internal GUID for the object
  : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
- : @returns Label specific to dependency or Impact Tree Node
+ : @returns html nodes
  :)
 declare function mhtml:DepenencyLabel (
     $node as node()*,
@@ -103,12 +121,15 @@ declare function mhtml:DepenencyLabel (
     let $name := data($node/@objectName)
     let $referenceTo   := data($node/@referenceTo)
     let $referenceType := data($node/@referenceType)
+    let $label := switch ($referenceType)
+                 case "Connector" return data($node/@connectorType)
+                 default return $referenceType
     let $url  := data($node/@docUri)
     let $html := <li>
                     {
-                        if (empty($url)) then concat($referenceTo," [",$referenceType,"]")
+                        if (empty($url) or string($url) = '') then concat($referenceTo," [",$label,"]")
                         else
-                        <a href="{$pathPrefix}/{$url}">{$referenceTo} [{$referenceType}]</a> 
+                        <a href="{$pathPrefix}/{$url}">{$referenceTo} [{$label}]</a> 
                     }
                     {mhtml:DependencyTree($node,$pathPrefix)}
                 </li>
@@ -117,8 +138,10 @@ declare function mhtml:DepenencyLabel (
 };
 
 
+
 (:~
  : Renders Impact used by label from usedBy Element with a reference to an object
+ :
  : <code>&lt;usedBy displayName="Logging Framework Configuration" 
  :   name="Logging_Framework_Configuration" 
  :   guid="121jjjlqAKNhxs9emgKOWk" 
@@ -131,7 +154,7 @@ declare function mhtml:DepenencyLabel (
  :   
  : @param $node as xs:string? IICS internal GUID for the object
  : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
- : @returns Label specific to dependency or Impact Tree Node
+ : @returns html nodes
  :)
 declare function mhtml:usedByLabel (
     $node as node()*,
@@ -142,15 +165,23 @@ declare function mhtml:usedByLabel (
     let $dependsOn := data($node/@dependsOn)
     let $url :=  data($node/@docUri)
     let $html := <li> 
-                    <a href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
+                    {
+                        if (empty($url) or string($url) = '') then concat($name,"[ ",$referenceType,":",$dependsOn,"]")
+                        else
+                        <a href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
+                    }
                     {mhtml:DependencyTree($node,$pathPrefix)}
                 </li>
     return
     $html
 };
 
-(:~ Function Generates
- : 
+(:~ Function Generates Div Label With correcponding Design Object icon based on the design MimeType Field Value
+ :
+ : @param $objectType as xs:string? Vaulue of Design rep:Item/rep:MimeType
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @param $options as map(*) Map object with rendering Options (reserved for future use, currently ignored)
+ : @returns html nodes
 :)
 declare function mhtml:objectWithIcon(
     $objectType as xs:string?,
@@ -173,7 +204,12 @@ declare function mhtml:objectWithIcon(
   </div>
 };
 
-
+(:~ Function Generates Table with Design Object Attributes (all immediate Children  of rep:Item element except the rep:Item/rep:Entry)
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:RepositoryMetadata (
   $designDoc as node(),
   $pathPrefix as xs:string?
@@ -196,7 +232,12 @@ declare function mhtml:RepositoryMetadata (
     </div> 
 };
 
-
+(:~ Function Generates Table with Design Object Common Attributes and Sub Section With Desig Type Specific Details
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:DesigFileMetadata(
     $designDoc as node(),
     $pathPrefix as xs:string?
@@ -263,6 +304,13 @@ declare function mhtml:DesigFileMetadata(
     </div>
 };
 
+
+(:~ Dispatch Function to generate Design Specific Information Sections of the Report
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:ObjectInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -274,11 +322,16 @@ declare function mhtml:ObjectInfo (
         case element(hen:processObject) return mhtml:ProcessObjectInfo($node,$pathPrefix)
         case element(con:connection) return mhtml:ConnectionInfo($node,$pathPrefix)
         case element(sfd:taskflow) return (mhtml:ProcessInfo($node,$pathPrefix),mhtml:TaskFlowInfo($node,$pathPrefix))
-
         default return ()
     
 };
 
+(:~ Function to generate Guide Information Sections of the Report
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:GuideInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -309,6 +362,12 @@ declare function mhtml:GuideInfo (
     </div>
 };
 
+(:~ Function to generate Input,Temp,Output Fields Information Information for Guides, Processes and Task Flows
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:FieldsInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -395,7 +454,12 @@ declare function mhtml:FieldsInfo (
     </div>
 };
 
-
+(:~ Function to generate Process Design Information
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:ProcessInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -434,6 +498,13 @@ declare function mhtml:ProcessInfo (
     </div>
 };
 
+
+(:~ Function to generate Connection Information 
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:ConnectorInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -538,6 +609,12 @@ declare function mhtml:ConnectorInfo (
     </div>
 };
 
+(:~ Function to generate Process Object Design Information
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:ProcessObjectInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -571,6 +648,12 @@ declare function mhtml:ProcessObjectInfo (
     </div>
 };
 
+(:~ Function to generate Connection Design Information
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:ConnectionInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -609,6 +692,12 @@ declare function mhtml:ConnectionInfo (
     </div>
 };
 
+(:~ Function to generate Task Flow Design Information
+ :
+ : @param $designDoc as node() Design Document
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
+:)
 declare function mhtml:TaskFlowInfo (
     $node as node(),
     $pathPrefix as xs:string?
@@ -683,21 +772,23 @@ declare function mhtml:TaskFlowInfo (
 
 
 
-(: Function will render dependency xml tree as a table with distinct object dependencies
-
-<dependencies object="Setup_Logging_DB" guid="akOVKXc0aE7lAct0X7uEMo">
-  <dependency objectName="Setup Logging DB" referenceFrom="Setup_Logging_DB" referenceTo="SP-Setup-Logging-DB" fromGuid="akOVKXc0aE7lAct0X7uEMo" toGuid="jSu7p8fQuE8dQDuX3vRk6v" referenceType="Process" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/Logging/Setup/SP-Setup-Logging-DB.PROCESS.xml">
-    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiResponse" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
-    <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiDataAccessRequest" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
-    <dependency objectName="SP-Setup-Logging-DB" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml">
-      <dependency objectName="DataAccessService" referenceFrom="DataAccessService" referenceTo="DataAccessService" fromGuid="jhXRGp8HGy8fOjJy57yhy1" toGuid="cZ66760oF8pjwt5OEx7AY1" referenceType="Connector" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_SERVICE_CONNECTOR.xml" uuid="93d7509e-96fb-4872-b8c1-41f382c1811f"/>
-    </dependency>
-    <dependency objectName="execMultiSQL" referenceFrom="jSu7p8fQuE8dQDuX3vRk6v" referenceTo="execMultiSQL" fromGuid="SP-Setup-Logging-DB" toGuid="" referenceType="Service" docUri="">
-      <info>This Service reference is either System Service or Connection Service</info>
-    </dependency>
-  </dependency>
-</dependencies>
-
+(: Function will render dependencies as a table with distinct object dependencies
+ : Example Dependency tree Source
+ : <dependencies object="Setup_Logging_DB" guid="akOVKXc0aE7lAct0X7uEMo">
+ :   <dependency objectName="Setup Logging DB" referenceFrom="Setup_Logging_DB" referenceTo="SP-Setup-Logging-DB" fromGuid="akOVKXc0aE7lAct0X7uEMo" toGuid="jSu7p8fQuE8dQDuX3vRk6v" referenceType="Process" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/Logging/Setup/SP-Setup-Logging-DB.PROCESS.xml">
+ :     <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiResponse" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
+ :     <dependency objectName="DataAccessService" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService:tMultiDataAccessRequest" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection:ProcessObject" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml"/>
+ :     <dependency objectName="SP-Setup-Logging-DB" referenceFrom="SP-Setup-Logging-DB" referenceTo="DataAccessService" fromGuid="jSu7p8fQuE8dQDuX3vRk6v" toGuid="jhXRGp8HGy8fOjJy57yhy1" referenceType="Connection" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_CONNECTION.xml">
+ :       <dependency objectName="DataAccessService" referenceFrom="DataAccessService" referenceTo="DataAccessService" fromGuid="jhXRGp8HGy8fOjJy57yhy1" toGuid="cZ66760oF8pjwt5OEx7AY1" referenceType="Connector" connectorType="businessConnector" docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/DAS/DataAccessService.AI_SERVICE_CONNECTOR.xml" uuid="93d7509e-96fb-4872-b8c1-41f382c1811f"/>
+ :     </dependency>
+ :     <dependency objectName="execMultiSQL" referenceFrom="jSu7p8fQuE8dQDuX3vRk6v" referenceTo="execMultiSQL" fromGuid="SP-Setup-Logging-DB" toGuid="" referenceType="Service" docUri="">
+ :       <info>This Service reference is either System Service or Connection Service</info>
+ :     </dependency>
+ :   </dependency>
+ : </dependencies>
+ : @param $designDependencies as node()* Design Dependecies Structure
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
 :)
 declare function mhtml:ObjectDependencies (
     $designDependencies as node()*,
@@ -770,24 +861,28 @@ declare function mhtml:ObjectDependencies (
     </div>
 };
 
-(:~
-    <usedBy displayName="UncaughtFaultAlertHandler-NA" 
-        name="UncaughtFaultAlertHandler-NA" 
-        guid="9UWeUqnSHkalqQVZI82Ekf" 
-        dependsOn="github-gist-alert-configuration:getGistFile" 
-        dependsOndisplayName="github-gist-alert-configuration" 
-        dependsOnGuid="2AJJfAJqQLkaZMytvRBVWR" 
-        referenceType="service" 
-        docUri="Explore/Alerting/Processes/UncaughtFaultAlertHandler-NA.PROCESS.xml">
-        <usedBy displayName="Alert Configuration Manager" 
-            name="Alert_Configuration_Manager" 
-            guid="8zodeZJhfnBdPPMtFf1DQE" 
-            dependsOn="UncaughtFaultAlertHandler-NA" 
-            dependsOndisplayName="UncaughtFaultAlertHandler-NA" 
-            dependsOnGuid="9UWeUqnSHkalqQVZI82Ekf" 
-            referenceType="service" 
-            docUri="Explore/Alerting/Guides/Alert Configuration Manager.GUIDE.xml"/>
-    </usedBy>
+(:~ Function produces Used By Impact Summary Table
+ : <usedBy displayName="UncaughtFaultAlertHandler-NA" 
+ :     name="UncaughtFaultAlertHandler-NA" 
+ :     guid="9UWeUqnSHkalqQVZI82Ekf" 
+ :     dependsOn="github-gist-alert-configuration:getGistFile" 
+ :     dependsOndisplayName="github-gist-alert-configuration" 
+ :     dependsOnGuid="2AJJfAJqQLkaZMytvRBVWR" 
+ :     referenceType="service" 
+ :     docUri="Explore/Alerting/Processes/UncaughtFaultAlertHandler-NA.PROCESS.xml">
+ :     <usedBy displayName="Alert Configuration Manager" 
+ :         name="Alert_Configuration_Manager" 
+ :         guid="8zodeZJhfnBdPPMtFf1DQE" 
+ :         dependsOn="UncaughtFaultAlertHandler-NA" 
+ :         dependsOndisplayName="UncaughtFaultAlertHandler-NA" 
+ :         dependsOnGuid="9UWeUqnSHkalqQVZI82Ekf" 
+ :         referenceType="service" 
+ :         docUri="Explore/Alerting/Guides/Alert Configuration Manager.GUIDE.xml"/>
+ : </usedBy>
+ :
+ : @param $impactData as node()* Design Impact (Used By) tree
+ : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
+ : @returns html nodes
  :
 :)
 declare function mhtml:ObjectusedBy (
@@ -826,10 +921,10 @@ declare function mhtml:ObjectusedBy (
                     let $design        := $impacts[1] 
                     let $dependsOn     := data($design/@dependsOn)
                     let $dependsOnGuid := data($design/@dependsOnGuid)
-                    let $dependsOndisplayName       := data($design/@dependsOndisplayName)
+                    let $dependsOndisplayName := data($design/@dependsOndisplayName)
                     let $location      := data($design/@docUri)
                     let $referenceType := data($design/@referenceType)
-                    let $designUri := concat($pathPrefix,'/',$location)
+                    let $designUri     := concat($pathPrefix,'/',$location)
                     order by $impact 
                 return
                 <tr>
@@ -852,7 +947,6 @@ declare function mhtml:ObjectusedBy (
             }
             </tbody>
         </table>
-        </div>
-        
+        </div>   
     </div>
 };

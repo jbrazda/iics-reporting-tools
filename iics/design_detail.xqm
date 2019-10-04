@@ -101,7 +101,10 @@ function iics:render(
             <div id="deptree" style="margin-right:auto;margin-left:0px">
                 <h2>Dependency Data</h2>
                 <div>
-                    {mhtml:DependencyTree($designDependencies,$pathPrefix)}
+                    <ul class="tree">
+                        {mhtml:objectWithIcon(data($design/rep:MimeType),$displayName,())}
+                        {mhtml:DependencyTree($designDependencies,$pathPrefix)}
+                    </ul>
                 </div>
             </div> <!--END div #deptree -->
         </div> <!--END div #tabs-->
