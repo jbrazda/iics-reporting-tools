@@ -35,12 +35,21 @@ declare variable $mhtml:IPD_TYPES :=
         "application/xml+taskflow": "Task Flow"
         };
 
-(:
-declare variable $mhtml:REF_TYPE_ICONS := 
-    map {
-        "",""
-        }
+(:~ map reference type to sprite class
 :)
+declare variable $mhtml:REF_TYPE_CLASS := 
+    map {
+        "Connection": "connection",
+        "Connection:ProcessObject": "connection",
+        "Connection:Service": "connection",
+        "Connector": "connector",
+        "objectlist": "processObject",
+        "Process": "process",
+        "reference": "processObject",
+        "Service": "process",
+        "Guide": "guide",
+        "Task Flow": "taskflow"
+        };
 
 declare variable $mhtml:URL_REST_PREFIX := "/rest";
 
@@ -62,7 +71,7 @@ declare variable $mhtml:URL_REST_PREFIX := "/rest";
  : @param $guid as xs:string? IICS internal GUID for the object
  : @param $pathPrefix as xs:string? Parameter is used to generate links to referenced documents over basex REST API example /rest/DB_NAME
  : @return empty set if file is not found in the repository or a document Instance of design with metadata
- :)
+:)
 declare function mhtml:DependencyTree (
     $node as node()*,
     $pathPrefix as xs:string?
@@ -124,12 +133,13 @@ declare function mhtml:DepenencyLabel (
     let $label := switch ($referenceType)
                  case "Connector" return data($node/@connectorType)
                  default return $referenceType
+    let $class := $mhtml:REF_TYPE_CLASS($referenceType)
     let $url  := data($node/@docUri)
     let $html := <li>
                     {
-                        if (empty($url) or string($url) = '') then concat($referenceTo," [",$label,"]")
+                        if (empty($url) or string($url) = '') then <span class="icon {$class}">{$referenceTo} [{$label}]</span>
                         else
-                        <a href="{$pathPrefix}/{$url}">{$referenceTo} [{$label}]</a> 
+                        <a class="icon {$class}" href="{$pathPrefix}/{$url}">{$referenceTo} [{$label}]</a> 
                     }
                     {mhtml:DependencyTree($node,$pathPrefix)}
                 </li>
@@ -168,7 +178,7 @@ declare function mhtml:usedByLabel (
                     {
                         if (empty($url) or string($url) = '') then concat($name,"[ ",$referenceType,":",$dependsOn,"]")
                         else
-                        <a href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
+                        <a class="icon processObject" href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
                     }
                     {mhtml:DependencyTree($node,$pathPrefix)}
                 </li>

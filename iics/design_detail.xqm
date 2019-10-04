@@ -66,7 +66,7 @@ function iics:render(
                     'copy',
                     {{
                         extend: 'excel',
-                        filename: '{$guid}',
+                        filename: '{$displayName}'
                     }},
                     'csvHtml5',
                     'print'
@@ -100,8 +100,8 @@ function iics:render(
             </div> <!--END div #impact -->
             <div id="deptree" style="margin-right:auto;margin-left:0px">
                 <h2>Dependency Data</h2>
-                <div>
-                    <ul class="tree">
+                <div style="padding-left: 15px;">
+                    <ul class="tree" style="padding-left: 25px;">
                         {mhtml:objectWithIcon(data($design/rep:MimeType),$displayName,())}
                         {mhtml:DependencyTree($designDependencies,$pathPrefix)}
                     </ul>

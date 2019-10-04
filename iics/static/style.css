@@ -9,8 +9,8 @@ html,body,.ui-widget,th,td,p,span,button,input,select,textarea {
 
 table.display {
     margin: auto 0;
-    margin-right:auto;
-    margin-left:0px;
+    margin-right: auto;
+    margin-left: 0px;
     width: fit-content;
 }
 
@@ -23,7 +23,7 @@ table.display {
 }
 
 /* Clear floats after the columns */
-.summaryContainer:after {
+.summaryContainer: after {
   content: "";
   display: inline-block;
   clear: both;
@@ -44,7 +44,7 @@ table.display {
 
 .reportSection {
     padding: 5px;
-    margin: 10px ;
+    margin: 10px;
 }
 
 code {
@@ -62,7 +62,7 @@ pre {
 }
 
 .simpleTable {
-    border-collapse: collapse
+    border-collapse: collapse;
 }
 
 .simpleTable td, .simpleTable th {
@@ -100,38 +100,75 @@ img {
 }
 
 
-
+/* Tree View  Classes */
 ul.tree, ul.tree ul {
     list-style: none;
      margin: 0;
      padding: 0;
-   } 
-   ul.tree ul {
-     margin-left: 10px;
    }
+   
+   ul.tree ul {
+     margin-left: 25px;
+   }
+   
    ul.tree li {
      margin: 0;
      padding: 0 7px;
-     line-height: 20px;
+     line-height: 30px;
      color: #369;
-     font-weight: bold;
-     border-left:1px solid rgb(100,100,100);
+     border-left: 1px solid rgb(100, 100, 100);
 
    }
+   
    ul.tree li:last-child {
-       border-left:none;
+       border-left: none;
    }
-   ul.tree li:before {
-      position:relative;
-      top:-0.3em;
-      height:1em;
-      width:12px;
-      color:white;
-      border-bottom:1px solid rgb(100,100,100);
-      content:"";
-      display:inline-block;
-      left:-7px;
+   
+   ul.tree li::before {
+      position: relative;
+      top: -0.4em;
+      height: 1em;
+      width: 12px;
+      color: white;
+      border-bottom: 1px solid rgb(100, 100, 100);
+      content: "";
+      display: inline-block;
+      left: -7px;
    }
-   ul.tree li:last-child:before {
-      border-left:1px solid rgb(100,100,100);   
+   
+   ul.tree li:last-child::before {
+      border-left: 1px solid rgb(100, 100, 100);
    }
+
+/* Images Sprite Icons to corresponding  Object Type */
+.icon {
+  display: inline-block;
+  line-height: 30px;
+  padding-left: 30px;
+  background-size: 20px 20px;
+}
+
+.icon.connection {
+  background: url("icons/connections.svg") no-repeat scroll 0 0 transparent;
+  
+}
+
+.icon.guide {
+  background: url("icons/guide.svg") no-repeat scroll 0 0 transparent;
+}
+
+.icon.processObject {
+  background: url("icons/processobject-x22.png") no-repeat scroll 0 0 transparent;
+}
+
+.icon.connector {
+  background: url("icons/service_connector.svg") no-repeat scroll 0 0 transparent;
+}
+
+.icon.taskflow {
+  background: url("icons/taskflow.svg") no-repeat scroll 0 0 transparent;
+}
+
+.icon.process {
+  background: url("icons/process.svg") no-repeat scroll 0 0 transparent;
+}
