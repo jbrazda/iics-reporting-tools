@@ -94,7 +94,10 @@ function iics:render(
             <div id="impact" style="margin-right:auto;margin-left:0px">
                 <h2>Impact Analysis</h2>
                 <div>
-                    {mhtml:DependencyTree($designImpact,$pathPrefix)}
+                    <ul class="tree" style="padding-left: 25px;">
+                        {mhtml:objectWithIcon(data($design/rep:MimeType),$displayName,())}
+                        {mhtml:DependencyTree($designImpact,$pathPrefix)}
+                    </ul>
                     {mhtml:ObjectusedBy($designImpact,$pathPrefix)}
                 </div>
             </div> <!--END div #impact -->

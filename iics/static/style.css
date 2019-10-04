@@ -144,31 +144,36 @@ ul.tree, ul.tree ul {
 .icon {
   display: inline-block;
   line-height: 30px;
-  padding-left: 30px;
-  background-size: 20px 20px;
+  padding-left: 30px;  
 }
 
 .icon.connection {
   background: url("icons/connections.svg") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
   
 }
 
 .icon.guide {
   background: url("icons/guide.svg") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
 }
 
 .icon.processObject {
   background: url("icons/processobject-x22.png") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
 }
 
 .icon.connector {
   background: url("icons/service_connector.svg") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
 }
 
 .icon.taskflow {
   background: url("icons/taskflow.svg") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
 }
 
 .icon.process {
   background: url("icons/process.svg") no-repeat scroll 0 0 transparent;
+  background-size: 20px 20px;
 }

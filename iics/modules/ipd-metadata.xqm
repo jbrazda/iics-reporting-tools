@@ -514,6 +514,7 @@ declare function imf:getSubflowImpact (
        let $item        := root($service)/*/rep:Item
        let $itemName    := $item/rep:Name/text()
        let $itemGuid    := $item/rep:GUID/text()
+       let $designType  := $item/rep:MimeType/text()
        let $itemDisplayName := $item/rep:DisplayName/text()
        let $dependsOn   := typeswitch ($service) 
                              case element(sfd:subflow) return $service/sfd:subflowPath/text()
@@ -524,7 +525,7 @@ declare function imf:getSubflowImpact (
        return
        <usedBy displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
                dependsOn="{$dependsOn}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-               referenceType="{$referenceType}"
+               referenceType="{$referenceType}" designType="{$designType}"
                docUri="{$documentUri}">
            {
             if ($traverseImpactTree ) then 
@@ -561,6 +562,7 @@ declare function imf:getPOImpact (
          let $flowDesign  := root($flow)/*/rep:Item
          let $itemName    := $flowDesign/rep:Name/text()
          let $itemGuid    := $flowDesign/rep:GUID/text()
+         let $designType  := $flowDesign/rep:MimeType/text()
          let $itemDisplayName := $flowDesign/rep:DisplayName/text()
          let $useCount := count($flowDesign//(*:field|*:parameter)[(@type="reference" or @type="objectlist") and ./*:options/*:option[@name="referenceTo"]/text() = $fullName])
          where $useCount > 0 and $itemGuid != $guid
@@ -568,7 +570,7 @@ declare function imf:getPOImpact (
              <usedBy 
                displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
                dependsOn="{$name}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-               useCount="{$useCount}" referenceType="Process Object"
+               useCount="{$useCount}" referenceType="Process Object" designType="{$designType}"
                docUri="{$documentUri}">
                {
                   if ($traverseImpactTree ) then 
@@ -608,7 +610,9 @@ declare function imf:getConnectionImpact (
       let $flowDesign  := root($flow)/*/rep:Item
       let $itemName    := $flowDesign/rep:Name/text()
       let $itemGuid    := $flowDesign/rep:GUID/text()
+      let $designType  := $flowDesign/rep:MimeType/text()
       let $itemDisplayName := $flowDesign/rep:DisplayName/text()
+      
       let $distinctFields := distinct-values(
                            for $field in $flowDesign//(*:field|*:parameter)[@type="reference" or @type="objectList"]
                            let $referenceTo  := $field/*:options/*:option[@name="referenceTo"]/text()
@@ -621,7 +625,7 @@ declare function imf:getConnectionImpact (
                         <usedBy 
                            displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
                            dependsOn="{$field}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-                           referenceType="Process Object"
+                           referenceType="Process Object" designType="{$designType}"
                            docUri="{$documentUri}">
                            {
                               if ($traverseImpactTree ) then 
@@ -638,7 +642,7 @@ declare function imf:getConnectionImpact (
                            <usedBy 
                               displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
                               dependsOn="{$operationName}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-                              referenceType="Service"
+                              referenceType="Service" designType="{$designType}"
                               docUri="{$documentUri}">
                               {
                                  if ($traverseImpactTree ) then 
@@ -654,7 +658,7 @@ declare function imf:getConnectionImpact (
                            <usedBy 
                               displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
                               dependsOn="{$object}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-                              referenceType="Connection:Create"
+                              referenceType="Connection:Create" designType="{$designType}"
                               docUri="{$documentUri}">
                               {
                                  if ($traverseImpactTree ) then 
@@ -698,12 +702,13 @@ declare function imf:getConnectorImpact (
          let $flowDesign  := root($svc)/*/rep:Item
          let $itemName    := $flowDesign/rep:Name/text()
          let $itemGuid    := $flowDesign/rep:GUID/text()
+         let $designType  := $flowDesign/rep:MimeType/text()
          let $itemDisplayName := $flowDesign/rep:DisplayName/text()
          return
          <usedBy 
-               displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}"
+               displayName="{$itemDisplayName}" name="{$itemName}" guid="{$itemGuid}" 
                dependsOn="{$name}" dependsOndisplayName="{$displayName}" dependsOnGuid="{$guid}" 
-               referenceType="Connector"
+               referenceType="Connector" designType="{$designType}"
                docUri="{$documentUri}">
                {imf:getConnectionImpact($database,$connection,$traverseImpactTree )}
          </usedBy>

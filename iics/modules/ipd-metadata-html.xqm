@@ -35,6 +35,17 @@ declare variable $mhtml:IPD_TYPES :=
         "application/xml+taskflow": "Task Flow"
         };
 
+declare variable $mhtml:IPD_TUPS_TO_CLASS := 
+    map { 
+        "application/xml+processobject": "processObject",
+        "application/xml+connection": "connection",
+        "application/xml+screenflow": "guide",
+        "application/xml+process": "process",
+        "application/xml+businesssconnector": "connector",
+        "application/xml+taskflow": "taskflow"
+        };
+
+
 (:~ map reference type to sprite class
 :)
 declare variable $mhtml:REF_TYPE_CLASS := 
@@ -159,6 +170,7 @@ declare function mhtml:DepenencyLabel (
  :   dependsOndisplayName="Setup Logging DB" 
  :   dependsOnGuid="akOVKXc0aE7lAct0X7uEMo" 
  :   referenceType="subflow" 
+ :   designType="application/xml+connection"
  :   docUri="IICS-SRC-ICLAB-08-05-2019.zip/Explore/Logging/Logging Framework Configuration.GUIDE.xml"/&gt;
  :   </code>
  :   
@@ -172,13 +184,14 @@ declare function mhtml:usedByLabel (
 ) as item()*{
     let $name := data($node/@name)
     let $referenceType := data($node/@referenceType)
+    let $class := $mhtml:IPD_TUPS_TO_CLASS(data($node/@designType))
     let $dependsOn := data($node/@dependsOn)
     let $url :=  data($node/@docUri)
     let $html := <li> 
                     {
-                        if (empty($url) or string($url) = '') then concat($name,"[ ",$referenceType,":",$dependsOn,"]")
+                        if (empty($url) or string($url) = '') then <span class="icon {$class}">{$name} [ {$referenceType}:{$dependsOn})</span>
                         else
-                        <a class="icon processObject" href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
+                        <a class="icon {$class}" href="{$pathPrefix}/{$url}">{$name} [{$referenceType}:{$dependsOn}]</a>
                     }
                     {mhtml:DependencyTree($node,$pathPrefix)}
                 </li>
