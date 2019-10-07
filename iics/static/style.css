@@ -122,6 +122,7 @@ ul.tree, ul.tree ul {
    
    ul.tree li:last-child {
        border-left: none;
+       margin-top: -1px;
    }
    
    ul.tree li::before {
