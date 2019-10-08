@@ -21,11 +21,11 @@
         <os family="windows" />
     </condition>
 
-    <condition property="exec.ext" value="sh">
+    <condition property="exec.ext" value="">
         <os family="unix" />
     </condition>
 
-    <condition property="exec.ext" value="bat">
+    <condition property="exec.ext" value=".bat">
         <os family="windows" />
     </condition>
 
@@ -180,14 +180,14 @@
     </target>
 	
 	<target name="basex.run" depends="-env.info" description="Run Basex HTTP Server">
-	   <exec executable="${iics.reporting.basex.home}/bin/basexhttp" spawn="true"  dir="${iics.reporting.basex.home}" >
+	   <exec executable="${iics.reporting.basex.home}/bin/basexhttp${exec.ext}" spawn="true"  dir="${iics.reporting.basex.home}" >
 	     <env key="JAVA_HOME" value="${basex.java_home}" />
 	   	 <env key="PATH" value="${basex.PATH}" />
 	   </exec>
 	</target>
 	
 	<target name="basex.stop" depends="-env.info" description="Stop Basex HTTP Server">
-       <exec executable="${iics.reporting.basex.home}/bin/basexhttpstop"  dir="${iics.reporting.basex.home}" >
+       <exec executable="${iics.reporting.basex.home}/bin/basexhttpstop${exec.ext}"  dir="${iics.reporting.basex.home}" >
          <env key="JAVA_HOME" value="${basex.java_home}" />
          <env key="PATH" value="${basex.PATH}" />
        </exec>
