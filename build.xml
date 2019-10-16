@@ -133,7 +133,7 @@
         <echo level="info">${shell.open} ${help.file}</echo>
         <exec executable="${shell}" spawn="yes">
             <arg value="${shell.options}" />
-            <arg line="'${shell.open} ${help.file}'" />
+            <arg value='${shell.open} "${help.file}"'/>
         </exec>
     </target>
 
@@ -256,6 +256,7 @@
             <param name="basex.create.db.name" value="DEMO_DB"/>
             <param name="basex.create.db.source" value="${default.iics.reporting.downloads.dir}/${iics.reporting.sample.file}"/>
         </antcall>
+        
     </target>
     
     <target name="basex.sample.db.drop" depends="-env.info">
@@ -275,9 +276,14 @@
     </target>
 	
 	<target name="basex.create.db" depends="basex.install">
-		   <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set"/>
-		   <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set"/>
-		   <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}"/>
+        <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set"/>
+        <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set"/>
+        <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}"/>
+	    <echo level="info">Openning Browser ${shell.open} "${basex.http.base_url}/iics/report?database=${basex.create.db.name}"</echo>
+        <exec executable="${shell}" spawn="yes">
+            <arg value="${shell.options}" />
+            <arg value='${shell.open} "${basex.http.base_url}/iics/report?database=${basex.create.db.name}"' />
+        </exec>
 	</target>
     
     
