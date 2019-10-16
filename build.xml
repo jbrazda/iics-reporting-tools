@@ -67,7 +67,7 @@
     	</path>
     	<property name="basex.PATH" refid="basex-PATH"/>     
     	
-        <!-- Basex Installation Checks-->
+        <!-- BaseX Installation Checks-->
         <condition property="basex.cmd.available" value="true">
         	<or>
         		<available file="basex" filepath="${basex.PATH}" property="basex.present"/>
@@ -141,7 +141,7 @@
 
     <target name="basex.download" depends="-env.info"
         unless=""
-    	description="Download Basex">
+    	description="Download BaseX">
         <!-- Download OS Specific version of the tool-->
         <echo level="info">Basex Available: ${basex.cmd.available}</echo>
         <echo level="info">Downloading: ${basex.download.url}</echo>
@@ -154,8 +154,8 @@
     	description="Configure Reporting Tool">
         <echo level="info">IICS Reporting Configuration:</echo>
         
-    	<input defaultvalue="${default.iics.reporting.downloads.dir}" message="Download Basex To: " addproperty="iics.reporting.downloads.dir"></input>
-        <input defaultvalue="${default.iics.reporting.basex.home}" message="Install Basex To:" addproperty="iics.reporting.basex.home"></input>    	        
+    	<input defaultvalue="${default.iics.reporting.downloads.dir}" message="Download BaseX To: " addproperty="iics.reporting.downloads.dir"></input>
+        <input defaultvalue="${default.iics.reporting.basex.home}" message="Install BaseX To:" addproperty="iics.reporting.basex.home"></input>    	        
     	<echoproperties  destfile="${iics.reporting.config}">
     	  <propertyset>
     	    <propertyref prefix="iics.reporting."/>
@@ -165,14 +165,14 @@
     </target>
 	
 	<target name="install"
-		description="Install Tools and Deploy IICS Reporing App"
+		description="Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP server"
 		depends="configure,basex.install,basex.deploy.iics,basex.run">
 	
 	</target>
     
     <target name="basex.install" depends="basex.download" 
         unless="${basex.basexhttp.available}"
-    	description="Uninstalls Basex DB and Tools">
+    	description="Uninstalls BaseX DB and Tools">
     	<unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
         <chmod perm="ugo+rx">
             <fileset dir="${iics.reporting.basex.home}/bin">
@@ -194,12 +194,12 @@
     
 	<target name="basex.uninstall" depends="-env.info,basex.stop,confirm.basex.uninstall" 
 	    if="${basex.uninstall.confirmed}"
-        description="Installs or updates Basex DB Package and Tools">
+        description="Stops and Uninstall BaseX Server and Tools">
 	 	<delete dir="${iics.reporting.basex.home}" failonerror="true" verbose="true"/>
     </target>
 	
 	<target name="basex.run" depends="-env.info,check.basexhttp.up"
-		   unless="${basex.http.up}" description="Run Basex HTTP Server">
+		   unless="${basex.http.up}" description="Run BaseX HTTP Server">
         <exec executable="${iics.reporting.basex.home}/bin/basexhttp${exec.ext}" spawn="true"  dir="${iics.reporting.basex.home}" >
             <env key="JAVA_HOME" value="${basex.java_home}" />
             <env key="PATH" value="${basex.PATH}" />
@@ -207,7 +207,7 @@
         <waitfor checkevery="500" checkeveryunit="millisecond" maxwaitunit="minute" maxwait="1" timeoutproperty="basex.http.timeout">
             <http url="${basex.http.base_url}/"/>
         </waitfor>
-	    <fail if="basex.http.timeout" message="Timeout Waiting for Basex HTTP Server to start"/>
+	    <fail if="basex.http.timeout" message="Timeout Waiting for BaseX HTTP Server to start"/>
 	    <echo level="info">Basex HTTP Started on ${basex.http.base_url}</echo>
 	    <echo level="info">IICS Repoting available on ${basex.http.base_url}/iics</echo>
 	</target>
@@ -232,7 +232,7 @@
 	<target name="basex.stop" 
 		depends="-env.info,check.basexhttp.up" 
 		if="${basex.http.up}"
-	    description="Stop Basex HTTP Server">
+	    description="Stop BaseX HTTP Server">
 	    <exec executable="${iics.reporting.basex.home}/bin/basexhttpstop${exec.ext}"  dir="${iics.reporting.basex.home}" >
 	        <env key="JAVA_HOME" value="${basex.java_home}" />
 	        <env key="PATH" value="${basex.PATH}" />
@@ -250,22 +250,23 @@
     </target>
     
     
-    <target name="basex.sample.db.create" depends="-env.info">
+    <target name="basex.sample.db.create" depends="-env.info"
+        description="Create Sample DEMO_DB">
         <get src="${iics.reporting.sample.url}" dest="${default.iics.reporting.downloads.dir}/${iics.reporting.sample.file}" usetimestamp="true"/>
         <antcall target="basex.create.db">
             <param name="basex.create.db.name" value="DEMO_DB"/>
             <param name="basex.create.db.source" value="${default.iics.reporting.downloads.dir}/${iics.reporting.sample.file}"/>
         </antcall>
-        
     </target>
     
-    <target name="basex.sample.db.drop" depends="-env.info">
+    <target name="basex.sample.db.drop" depends="-env.info"
+        description="Drop Sample DEMO_DB">
         <antcall target="basex.drop.db">
             <param name="basex.drop.db.name" value="DEMO_DB"/>
         </antcall>
     </target>
 	
-	<target name="projec.update.from.basex" depends="-env.info" 
+	<target name="project.update.from.basex" depends="-env.info" 
         if="${basex.basexhttp.available}"
         description="Updates iics reporting modules and sources from basex http server webapp/iics dir ">
         <copy todir="${basedir}" verbose="true" overwrite="true">
@@ -275,14 +276,16 @@
         </copy>
     </target>
 	
-	<target name="basex.create.db" depends="basex.install">
+	<target name="basex.create.db" depends="basex.install"
+	    description="Create new BaseX Database from Source file, archive or directory">
         <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set"/>
         <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set"/>
         <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}"/>
 	</target>
     
     
-    <target name="basex.drop.db" depends="basex.install">
+    <target name="basex.drop.db" depends="basex.install"
+        description="Drop Existing BaseX DB by name">
            <fail unless="basex.drop.db.name" message="Required property 'basex.create.db.name' is not set"/>
            <basex.dropDB dbname="${basex.drop.db.name}"/>
     </target>
