@@ -279,11 +279,6 @@
         <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set"/>
         <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set"/>
         <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}"/>
-	    <echo level="info">Openning Browser ${shell.open} "${basex.http.base_url}/iics/report?database=${basex.create.db.name}"</echo>
-        <exec executable="${shell}" spawn="yes">
-            <arg value="${shell.options}" />
-            <arg value='${shell.open} "${basex.http.base_url}/iics/report?database=${basex.create.db.name}"' />
-        </exec>
 	</target>
     
     
