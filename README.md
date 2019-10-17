@@ -7,19 +7,19 @@ Tool  is Installed and deployed by Apache Ant Script and set of XQuery modules b
 
 <!-- TOC -->
 
-- [IICS Design Reporting Tools](#markdown-header-iics-design-reporting-tools)
-    - [Features](#markdown-header-features)
-    - [Installation of the Tool](#markdown-header-installation-of-the-tool)
-        - [Pre-requisites](#markdown-header-pre-requisites)
-    - [Install Steps](#markdown-header-install-steps)
-    - [Create Exported Objects Database](#markdown-header-create-exported-objects-database)
-    - [Ant Script main Properties File](#markdown-header-ant-script-main-properties-file)
-    - [Target basex.create.db](#markdown-header-target-basexcreatedb)
-    - [Parameters](#markdown-header-parameters)
-    - [Example Use in Ant Script](#markdown-header-example-use-in-ant-script)
-    - [Target basex.create.db](#markdown-header-target-basexcreatedb_1)
-    - [Parameters](#markdown-header-parameters_1)
-    - [Example Use in Ant Script](#markdown-header-example-use-in-ant-script_1)
+- [IICS Design Reporting Tools](#iics-design-reporting-tools)
+    - [Features](#features)
+    - [Installation of the Tool](#installation-of-the-tool)
+        - [Pre-requisites](#pre-requisites)
+    - [Install Steps](#install-steps)
+    - [Create Exported Objects Database](#create-exported-objects-database)
+    - [Ant Script main Properties File](#ant-script-main-properties-file)
+    - [Target basex.create.db](#target-basexcreatedb)
+    - [Parameters](#parameters)
+    - [Example Use in Ant Script](#example-use-in-ant-script)
+    - [Target basex.create.db](#target-basexcreatedb-1)
+    - [Parameters](#parameters-1)
+    - [Example Use in Ant Script](#example-use-in-ant-script-1)
 
 <!-- /TOC -->
 
