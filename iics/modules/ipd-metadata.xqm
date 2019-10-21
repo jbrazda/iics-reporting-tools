@@ -223,8 +223,8 @@ declare function imf:getDesignDependencies (
    (   
       $objectDependencies
       ,imf:getSubflowDependencies($database,$designFile,$parentFlows)
-      ,$connectionDependencies
       ,imf:getServiceDependencies($database,$designFile,$parentFlows)
+      ,$connectionDependencies
    )
 };
 
@@ -276,13 +276,11 @@ declare function imf:getConnectionDependencies (
     let $referenceFrom  := $fromDesignFile/rep:Name/text()
     let $fromGuid       := $fromDesignFile/rep:GUID/text()
     let $displayName    := $fromDesignFile/rep:DisplayName/text()
-    
-    
     let $referedCon     := imf:getDesignByObjectName($database,"connection",$connectionName)
     let $warnings       := switch (count($referedCon ))
                case 0 
                   return 
-                     <warning type="Missing Connection Reference">Counld not find a connection Definition '{$connectionName}'</warning>
+                     <warning type="Missing Connection Reference">Counld not find a Connection Definition '{$connectionName}'</warning>
                case 1 
                   return ()
                default 
@@ -291,7 +289,7 @@ declare function imf:getConnectionDependencies (
                         {string-join(for $item in $referedCon return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
                      </warning>
                      
-    let $connectionName := $referedCon[1]/rep:Name/text()
+    let $connectionName := if (empty($referedCon)) then $connectionName else $referedCon[1]/rep:Name/text()
     let $connectionGuid := $referedCon[1]/rep:GUID/text()
     let $design         := $referedCon[1]/rep:Entry/* 
     let $connectorDescriptor := $design/(*:soaConnector|*:businessConnector|*:javaConnector)
@@ -315,15 +313,20 @@ declare function imf:getConnectionDependencies (
                 fromGuid="{$fromGuid}" toGuid="{$connectionGuid}" 
                 referenceType="Connection" connectorType="{$connectorType}"
                 docUri="{$connectionUri}">
+
+       {
+       if (empty($connectorId )) then <warning type="Unresolved Connector reference">Unable to Resove Connection Connector Reference or Type</warning>
+       else
        <dependency objectName="{$connectorDisplayName}" 
                 referenceFrom="{$connectionName}" 
                 referenceTo="{$referenceTo}" 
                 fromGuid="{$connectionGuid}" toGuid="{$connectorGuid}" 
                 referenceType="Connector" connectorType="{$connectorType}"
                 docUri="{$connectorUri}">
-         {$connector/@*, 
-         $connectorDescriptor/@uuid,$warnings}
+         {$connector/@*, $connectorDescriptor/@uuid}
        </dependency>
+       }
+       {$warnings}
     </dependency>
 };
 
@@ -392,7 +395,7 @@ declare function imf:getConnectionDependencies (
  :)
 declare function imf:getSubflowDependencies (
    $database as document-node()*, 
-   $parentDesign as node(), 
+   $parentDesign as node()?, 
    $parentFlows as xs:string*
 ) as node()* {
     let $fromGuid := $parentDesign/rep:GUID/text()
@@ -407,14 +410,15 @@ declare function imf:getSubflowDependencies (
     return 
       for $subflowId in $distinctSubflowsMinusParent
             let $refFlow       := imf:getDesignByGuid($database,$subflowId)
-            let $design        := $refFlow[1]/rep:Entry/*
-            let $toGuid        := $refFlow[1]/rep:GUID/text()
-            let $referenceTo   := $refFlow[1]/rep:Name/text()
+            let $reference     := $parentDesign//(*:subflow|*:callProcess)[*:subflowGUID/text() = $subflowId and position() = 1] 
+            let $design        := $refFlow[1]/rep:Entry/* 
+            let $toGuid        := if (empty($refFlow)) then $subflowId else $refFlow[1]/rep:GUID/text()
+            let $referenceTo   := if (empty($refFlow)) then $reference/*:subflowPath/text() else $refFlow[1]/rep:Name/text()
             let $referenceType := switch (local-name($design))
                     case "avosScreenflow" return "Guide"
                     case "process" return "Process"
-                    default return "Unknown"
-            let $docUri := db:path($refFlow)
+                    default return local-name($reference)
+            let $docUri := if (empty($refFlow)) then "." else db:path($refFlow)
             return
               <dependency objectName="{$fromDisplayName}" 
                   referenceFrom="{$referenceFrom}" referenceTo="{$referenceTo}"
@@ -428,7 +432,7 @@ declare function imf:getSubflowDependencies (
                   switch (count($refFlow))
                      case 0 
                         return 
-                        <warning type="Missing SubFlow reference">Counld not find a Sub Flow Definition '{$referenceTo}' guid:{$toGuid} </warning>
+                        <warning type="Missing Referenced Design">Counld not find a {$referenceType} reference '{$referenceTo}' guid:{$subflowId} </warning>
                      case 1 
                         return ()
                      default 
@@ -479,9 +483,8 @@ declare function imf:getServiceDependencies (
             fromGuid="{$fromGuid}" toGuid="{$serviceGUID}"
             referenceType="{$referenceType}" 
             docUri="{$docUri}">
-            {if (empty($serviceDesign)) then () else  imf:getDesignDependencies($database,$serviceDesign,$distinctSubflowsMinusParent) }
-            {if (empty($serviceDesign) and empty($serviceGUID)) then <info>This Service reference is either System Service or Connection Service</info> else()}
-            {if (empty($serviceDesign) and not(empty($serviceGUID))) then <warning type="Missing Object Reference">Could not find reference to Process as a Service {$serviceName} guid:{$serviceGUID}</warning> else()}
+            {if (empty($serviceDesign)) then <warning type="Missing Design Reference">Could not find reference to {$serviceName} guid:{$serviceGUID}</warning>  else  imf:getDesignDependencies($database,$serviceDesign,$distinctSubflowsMinusParent) }
+            {if (empty($serviceDesign) and not(empty($serviceGUID))) then <warning type="Missing Design Reference">Could not find reference to Process as a Service {$serviceName} guid:{$serviceGUID}</warning> else()}
         </dependency>
     return 
     $dependencies
