@@ -3,7 +3,7 @@
 This project contains set of tools to provide reporting on exported assets packages from Informatica IICS
 Tool  is Installed and deployed by Apache Ant Script and set of XQuery modules based web application deployed on BaseX Database HTTP Server
 
-![Designs Report](doc/images/IICS_DesignsReport.png "Designs Report")
+![Designs Report](doc/images/IICS_Designs_Report.png "Designs Report")
 
 <!-- TOC -->
 

@@ -153,12 +153,12 @@ function report:start(
       </script>
     },
     <body>
-        <div class="reportsection">
-            <img src="https://www.informatica.com/content/dam/informatica-com/global/informatica-logo.png" style="float:right" />
-            <h1>Informatica Cloud Application Integration</h1>
-            <h2>Design Objects Report</h2>
-            
-        </div>
+        {html:pageHeader(map { 
+                        'breadCrumbs': <breadcrumbs>
+                                    <a href="/iics/database">Databases</a>
+                                    <a href="/iics/report?database=">{$database}</a>
+                                </breadcrumbs>
+                         },())}
         <div id="tabs">
             <ul>
                 <li><a href="#summary">Summary</a></li>

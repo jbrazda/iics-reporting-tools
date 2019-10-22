@@ -7,6 +7,10 @@ html,body,.ui-widget,th,td,p,span,button,input,select,textarea {
     font-family: Arial, Helvetica, Verdana, sans-serif;
 }
 
+body {
+    margin: 0;
+}
+
 table.display {
     margin: auto 0;
     margin-right: auto;
@@ -178,3 +182,162 @@ ul.tree, ul.tree ul {
   background: url("icons/process.svg") no-repeat scroll 0 0 transparent;
   background-size: 20px 20px;
 }
+
+
+/* Header and  Menu Styles */
+
+
+.indexHeader {
+    height: 50px;
+    background-color: #000;
+    overflow-y: visible;
+    padding: 0 5px;
+}
+
+.hamburgerMenu {
+    padding: 10px 5px 5px 5px;
+    cursor: pointer;
+}
+
+.indexHeaderLeft, .indexHeaderMenus {
+    padding-left: 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.indexHeaderMenus {
+    padding-left: 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.indexHeaderRight {
+    float: right;
+}
+
+.indexHeaderLeft, .indexHeaderSearch, .indexHeaderOrg, .indexHeaderMenus, .indexHeaderMenus>div {
+    float: left;
+}
+
+.infaButton-dark.infaButton-toolbar-icon svg, .infaButton-dark.infaButton-toolbar-icon.infaButton.infaButton-toolbar-icon-anim svg {
+    fill: #848484;
+}
+
+.indexHeaderImage {
+    width: 123px;
+    height: 30px;
+    vertical-align: middle;
+}
+
+.indexHeaderMenus>div {
+    padding-left: 7px;
+}
+
+.infaButton {
+    display: inline-block;
+    position: relative;
+    padding: 0;
+    text-align: center;
+    font-size: 15px;
+    cursor: default;
+}
+
+.infaButton-interior {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    text-align: center;
+}
+
+.infaButton.infaButton-dark.infaButton-1 {
+    background: transparent;
+}
+
+.infaButton.infaButton-dark {
+    border: 1px solid transparent;
+}
+
+.infaButton-1 {
+    background: #ddd;
+    border: 1px solid #9C9C9C;
+    border-radius: 2px;
+    color: black;
+    line-height: 1;
+    min-height: 2em;
+    padding: 0 1em;
+}
+
+.infaButton-toolbar-icon.infaButton-state-toggle {
+    background: #D6EBFC;
+    border: 1px solid #39f;
+}
+
+.infaButton.infaButton-dark.infaButton-toolbar-icon {
+    background: transparent;
+    border-radius: 30px;
+    color: #848484;
+    padding: 6px;
+    margin-left: -3px;
+}
+
+.infaButton.infaButton-dark:hover, .infaButton.infaButton-dark.infaButton-state-hover, .infaButton.infaButton-dark.infaButton-state-toggle, .infaButton.infaButton-dark.keyboard-focus {
+    background: transparent !important;
+    color: #39f;
+}
+
+.hamburgerMenu>span.hamburgerMenuImg svg path {
+  fill: #39f;
+}
+
+.breadCrumbs {
+  padding-left: 2px;
+  color: #9C9C9C;
+  font-size: 14px;
+}
+
+.breadCrumbs>a {
+  color: whitesmoke;
+  text-decoration:none !important;
+}
+
+.breadCrumbs>a:link {
+  color: whitesmoke;
+}
+
+.breadCrumbs>a:visited {
+  color: whitesmoke;
+}
+
+.breadCrumbs>a:hover {
+  color:#39f; 
+}
+
+.breadCrumbs> a:active {
+  color:chocolate;
+}
+
+

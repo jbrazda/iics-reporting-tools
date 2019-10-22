@@ -70,37 +70,42 @@ function iics:start(
     },
     <body>
         {html:pageHeader(map {
-            'h1': 'Databases'
             },
             ())}
-        <div id="db_table" class="tableWrapper">
-            <table class="display" id="databases_table" style="margin-right:auto;margin-left:0px">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Resources</th>
-                        <th>Size</th>
-                        <th>Modified Date</th>
-                        <th>Path</th>
-                    </tr>
-                </thead>
-                <tbody>       
-                    {
-                    for $db in db:list-details()
-                        let $containsIPDData := exists(db:open($db/text())//rep:Item)
-                        let $size := data($db/@size)
-                        where $containsIPDData
-                    return
-                    <tr>
-                        <td><a href="report?database={$db}" title="Open DB Report">{$db/text()}</a></td>
-                        <td>{data($db/@resources)}</td>
-                        <td>{prof:human(if(exists($size)) then xs:integer($size) else 0)}</td>
-                        <td>{format-dateTime(xs:dateTime($db/@modified-date),"[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [ZN,*-3]")}</td>
-                        <td>{data($db/@path)}</td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="reportSection">
+        Following is list of available databases please See the service documentation how to import IICS Exported Package to BaseX DB as a database.
+        <a href="https://github.com/jbrazda/iics-reporting-tools#create-exported-objects-database">How to Create DB</a>
+        </div>
+        <div class="reportSection">
+            <div id="db_table" class="tableWrapper">
+                <table class="display" id="databases_table" style="margin-right:auto;margin-left:0px">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Resources</th>
+                            <th>Size</th>
+                            <th>Modified Date</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody>       
+                        {
+                        for $db in db:list-details()
+                            let $containsIPDData := exists(db:open($db/text())//rep:Item)
+                            let $size := data($db/@size)
+                            where $containsIPDData
+                        return
+                        <tr>
+                            <td><a href="report?database={$db}" title="Open DB Report">{$db/text()}</a></td>
+                            <td>{data($db/@resources)}</td>
+                            <td>{prof:human(if(exists($size)) then xs:integer($size) else 0)}</td>
+                            <td>{format-dateTime(xs:dateTime($db/@modified-date),"[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [ZN,*-3]")}</td>
+                            <td>{data($db/@path)}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </body>)
     

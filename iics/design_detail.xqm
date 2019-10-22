@@ -76,10 +76,13 @@ function iics:render(
       </script>
     },
     <body>
-        {html:pageHeader(map {
-            'h1': ``[ Designs » `{$designType}` » `{ $displayName }` ]``
-            },
-            ())}
+        {html:pageHeader(map { 
+                            'breadCrumbs': <breadCrumbs> 
+                                <a href="/iics/database">Databases</a>
+                                <a href="{concat("/iics/report?database=",$database)}">{$database}</a>
+                                <a href="{concat("/iics/design?database=",$database,"&amp;guid=",$guid)}">{$displayName}</a>
+                                </breadCrumbs>
+                            },())}
         {mhtml:DesigFileMetadata($design,$pathPrefix)}
         <div id="tabs">
             <ul>

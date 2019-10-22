@@ -483,8 +483,7 @@ declare function imf:getServiceDependencies (
             fromGuid="{$fromGuid}" toGuid="{$serviceGUID}"
             referenceType="{$referenceType}" 
             docUri="{$docUri}">
-            {if (empty($serviceDesign)) then <warning type="Missing Design Reference">Could not find reference to {$serviceName} guid:{$serviceGUID}</warning>  else  imf:getDesignDependencies($database,$serviceDesign,$distinctSubflowsMinusParent) }
-            {if (empty($serviceDesign) and not(empty($serviceGUID))) then <warning type="Missing Design Reference">Could not find reference to Process as a Service {$serviceName} guid:{$serviceGUID}</warning> else()}
+            {if (empty($serviceDesign)) then <warning type="Missing Design Reference">Could not find referenced {$referenceType} to {$serviceName} guid:{$serviceGUID[1]}</warning>  else  imf:getDesignDependencies($database,$serviceDesign,$distinctSubflowsMinusParent) }
         </dependency>
     return 
     $dependencies
