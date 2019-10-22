@@ -5,6 +5,8 @@ Tool  is Installed and deployed by Apache Ant Script and set of XQuery modules b
 
 ![Designs Report](doc/images/IICS_Designs_Report.png "Designs Report")
 
+See [Other Screenshots](doc/screenshots.md)
+
 <!-- TOC -->
 
 - [IICS Design Reporting Tools](#iics-design-reporting-tools)
