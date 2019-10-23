@@ -156,7 +156,7 @@ function report:start(
         {html:pageHeader(map { 
                         'breadCrumbs': <breadcrumbs>
                                     <a href="/iics/database">Databases</a>
-                                    <a href="/iics/report?database=">{$database}</a>
+                                    <a href="/iics/report?database={$database}">{$database}</a>
                                 </breadcrumbs>
                          },())}
         <div id="tabs">
