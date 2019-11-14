@@ -289,7 +289,7 @@ declare function imf:getConnectionDependencies (
     let $referenceFrom  := $fromDesignFile/rep:Name/text()
     let $fromGuid       := $fromDesignFile/rep:GUID/text()
     let $displayName    := $fromDesignFile/rep:DisplayName/text()
-    let $referedCon     := imf:getDesignByObjectName($database,(),$connectionName)
+    let $referedCon     := imf:getDesignByObjectName($database,'connection',$connectionName)
     let $warnings       := switch (count($referedCon ))
                case 0 
                   return 
@@ -319,7 +319,7 @@ declare function imf:getConnectionDependencies (
                             default return $connector[1]/rep:Name/text()
     let $connectorUri  := if (empty($connector)) then ()
                            else db:path($connector)
-    let $connectionUri  := if (empty($referedCon)) then () else db:path($referedCon) 
+    let $connectionUri  := if (empty($referedCon)) then () else db:path($referedCon[1]) 
     return
     <dependency objectName="{$displayName}" 
                 referenceFrom="{$referenceFrom}" referenceTo="{$connectionName}"  
