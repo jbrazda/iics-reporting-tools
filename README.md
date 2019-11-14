@@ -10,18 +10,18 @@ See [Other Screenshots](doc/screenshots.md)
 <!-- TOC -->
 
 - [IICS Design Reporting Tools](#iics-design-reporting-tools)
-    - [Features](#features)
-    - [Installation of the Tool](#installation-of-the-tool)
-        - [Pre-requisites](#pre-requisites)
-    - [Install Steps](#install-steps)
-    - [Create Exported Objects Database](#create-exported-objects-database)
-    - [Ant Script main Properties File](#ant-script-main-properties-file)
-    - [Target basex.create.db](#target-basexcreatedb)
-    - [Parameters](#parameters)
-    - [Example Use in Ant Script](#example-use-in-ant-script)
-    - [Target basex.create.db](#target-basexcreatedb-1)
-    - [Parameters](#parameters-1)
-    - [Example Use in Ant Script](#example-use-in-ant-script-1)
+  - [Features](#features)
+  - [Installation of the Tool](#installation-of-the-tool)
+    - [Pre-requisites](#pre-requisites)
+  - [Install Steps](#install-steps)
+  - [Create Exported Objects Database](#create-exported-objects-database)
+  - [Ant Script main Properties File](#ant-script-main-properties-file)
+  - [Target basex.create.db](#target-basexcreatedb)
+  - [Parameters](#parameters)
+  - [Example Use in Ant Script](#example-use-in-ant-script)
+  - [Target basex.create.db](#target-basexcreatedb-1)
+  - [Parameters](#parameters-1)
+  - [Example Use in Ant Script](#example-use-in-ant-script-1)
 
 <!-- /TOC -->
 
@@ -140,7 +140,7 @@ This target Will create New database Typically from zip archive as a part of the
 ## Parameters
 
 | Property               | Description                                                                                                                         | Example Value                               |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
 | basex.create.db.name   | Database name                                                                                                                       | FaultAlertService_iclab-dev_all_designs     |
 | basex.create.db.source | Database source Can be Directory containing XML files, single XML File or zip archive which is the most common scenario in our case | FaultAlertService_iclab-dev_all_designs.zip |
 | env.info.displayed     | Suppress print of environment Info                                                                                                  | true                                        |
@@ -164,7 +164,7 @@ This target Will create New database Typically from zip archive as a part of the
 ## Parameters
 
 | Property           | Description                        | Example Value                           |
-| ------------------ | ---------------------------------- | --------------------------------------- |
+|--------------------|------------------------------------|-----------------------------------------|
 | basex.drop.db.name | Database name                      | FaultAlertService_iclab-dev_all_designs |
 | env.info.displayed | Suppress print of environment Info | true                                    |
 

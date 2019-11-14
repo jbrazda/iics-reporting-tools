@@ -122,11 +122,11 @@ declare function imf:getPODependencies (
     let $name := $design/rep:Name/text()
     
     let $referenceFrom := '$po:' || $name
-    return for $reference in $design//hen:detail/hen:field[@type="reference" or @type="objectlist"]
-            let $referenceTo    := $reference/hen:options/hen:option[@name="referenceTo"]/text()
+    return for $reference in $design//*:field[@type="reference" or @type="objectlist"]
+            let $referenceTo    := $reference/*:options/*:option[@name="referenceTo"]/text()
             let $objectName     := substring-after($referenceTo, ":")
             let $connectionName := substring-before($referenceTo, ":")
-            let $dependOnGuid   := $reference/hen:options/hen:option[@name = 'guid']/text()
+            let $dependOnGuid   := $reference/*:options/*:option[@name = 'guid']/text()
             let $referenceType  := if ($connectionName = '$po') then 'Process Object' else 'Connection PO'
             let $design         := imf:getDesignByGuid($database,$dependOnGuid) 
             let $children       := imf:getPODependencies($database,$design)
@@ -170,20 +170,33 @@ declare function imf:getDesignDependencies (
     let $guid := $designFile/rep:GUID/text()
     let $name := $designFile/rep:Name/text()
 
-    let $objectDependencies := for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectList"]
+    let $objectDependencies := for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectlist"]
                 let $referenceTo     := $field/*:options/*:option[@name="referenceTo"]/text()
                 let $objectContainer := substring-before($referenceTo, ":")
                 let $objectName      := substring-after($referenceTo, ":")
-                let $objectDesign    := imf:getDesignByObjectName($database,(),$objectName)
+                let $objectGuid      := $field/*:options/*:option[@name="guid"]/text()
+                let $objectDesign    := if (empty($objectGuid)) then imf:getDesignByObjectName($database,(),$objectName)
+                                          else imf:getDesignByGuid($database,$objectGuid)
+                let $docUri     := db:path($objectDesign)
                 return
                  switch  ( true() ) 
-                   case (count($objectDesign) = 0 and $objectContainer = '$po') 
+                   case (count($objectDesign) = 0 and $objectContainer="$po") 
                      return 
                         <warning type="Missing Object Reference">Could not find object reference to {$referenceTo}</warning> 
-                   case (count($objectDesign) = 1) 
+                   case (count($objectDesign) = 1 and $objectContainer="$po") 
                      return 
-                        imf:getPODependencies($database,$objectDesign)
-                   case (count($objectDesign) > 1) 
+                        <dependency 
+                           objectName="{$objectName}" 
+                           fromGuid="{$guid}"
+                           toGuid="{$objectGuid}"
+                           referenceFrom="{$name}"
+                           referenceTo="{$referenceTo}" 
+                           referenceType="{$field/@type}" 
+                           type="Process Object"
+                           docUri="{$docUri}">
+                           {imf:getPODependencies($database,$objectDesign)}
+                        </dependency>
+                   case (count($objectDesign) > 1 and $objectContainer="$po") 
                      return 
                         <warning type="Ambiguous Object Reference">Found more than 1 object with name {$referenceTo} 
                            {string-join(for $item in $objectDesign return $item/rep:Name/text() || '[' || $item/rep:GUID/text() || ']' )}
@@ -203,7 +216,7 @@ declare function imf:getDesignDependencies (
                   
    (: build distinct set of connections used by the process:)
    let $connections := 
-      for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectList"]
+      for $field in $design//(*:field|*:parameter)[@type="reference" or @type="objectlist"]
          let $referenceTo     := $field/*:options/*:option[@name="referenceTo"]/text()
          let $conName := substring-before($referenceTo,":")
       where $conName != "$po"
@@ -276,7 +289,7 @@ declare function imf:getConnectionDependencies (
     let $referenceFrom  := $fromDesignFile/rep:Name/text()
     let $fromGuid       := $fromDesignFile/rep:GUID/text()
     let $displayName    := $fromDesignFile/rep:DisplayName/text()
-    let $referedCon     := imf:getDesignByObjectName($database,"connection",$connectionName)
+    let $referedCon     := imf:getDesignByObjectName($database,(),$connectionName)
     let $warnings       := switch (count($referedCon ))
                case 0 
                   return 
@@ -616,7 +629,7 @@ declare function imf:getConnectionImpact (
       let $itemDisplayName := $flowDesign/rep:DisplayName/text()
       
       let $distinctFields := distinct-values(
-                           for $field in $flowDesign//(*:field|*:parameter)[@type="reference" or @type="objectList"]
+                           for $field in $flowDesign//(*:field|*:parameter)[@type="reference" or @type="objectlist"]
                            let $referenceTo  := $field/*:options/*:option[@name="referenceTo"]/text()
                            return
                            $referenceTo)
