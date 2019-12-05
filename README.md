@@ -22,6 +22,8 @@ See [Other Screenshots](doc/screenshots.md)
   - [Target basex.create.db](#target-basexcreatedb-1)
   - [Parameters](#parameters-1)
   - [Example Use in Ant Script](#example-use-in-ant-script-1)
+  - [Release Notes](#release-notes)
+    - [Release 2019-12-0](#release-2019-12-0)
 
 <!-- /TOC -->
 
@@ -175,4 +177,22 @@ This target Will create New database Typically from zip archive as a part of the
     <property name="basex.drop.db.name" value="DB_NAME"/>
     <property name="env.info.displayed" value="true"/>
 </ant>
+```
+
+## Release Notes
+
+### Release 2019-12-0
+
+- Upgraded BaseX Runtime to Version 9.3
+
+To update your BaseX Installation Pull changes from this repository and run following Commands
+
+> NOTE: This will completely remove previous installation including any previously imported Databases (If you want to preserve your existing databases, backup your basex_home/data before you proceed)
+
+```shell
+ant basex.stop
+ant basex.uninstall
+ant basex.install
+ant basex.deploy.iics
+ant basex.run
 ```
