@@ -140,7 +140,7 @@
 
 
     <target name="basex.download" depends="-env.info"
-        unless=""
+        unless="${basex.cmd.available}"
     	description="Download BaseX">
         <!-- Download OS Specific version of the tool-->
         <echo level="info">Basex Available: ${basex.cmd.available}</echo>
@@ -172,7 +172,7 @@
     
     <target name="basex.install" depends="basex.download" 
         unless="${basex.basexhttp.available}"
-    	description="Uninstalls BaseX DB and Tools">
+    	description="Installs BaseX DB and Tools">
     	<unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
         <chmod perm="ugo+rx">
             <fileset dir="${iics.reporting.basex.home}/bin">
