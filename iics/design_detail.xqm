@@ -3,6 +3,8 @@ module namespace iics = 'iics/design';
 import module namespace html   = 'iics/html' at 'modules/html.xqm';
 import module namespace mhtml  = 'iics/ipd-metafata-html' at 'modules/ipd-metadata-html.xqm';
 import module namespace imf    = 'iics/imf' at 'modules/ipd-metadata.xqm';
+import module namespace functx = 'http://www.functx.com';
+
 
 
 (:ICAI namespaces:)
@@ -83,7 +85,7 @@ function iics:render(
                                 <a href="{concat("/iics/design?database=",$database,"&amp;guid=",$guid)}">{$displayName}</a>
                                 </breadCrumbs>
                             },())}
-        {mhtml:DesigFileMetadata($design,$pathPrefix)}
+        {  mhtml:DesigFileMetadata($design[1],$pathPrefix) }
         <div id="tabs">
             <ul>
                 <li><a href="#dependencies">Dependencies</a></li>

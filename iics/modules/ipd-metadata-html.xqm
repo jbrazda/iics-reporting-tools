@@ -335,7 +335,7 @@ declare function mhtml:DesigFileMetadata(
  : @returns html nodes
 :)
 declare function mhtml:ObjectInfo (
-    $node as node(),
+    $node,
     $pathPrefix as xs:string?
 ) as item()* {
     typeswitch ($node)

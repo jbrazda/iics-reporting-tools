@@ -116,7 +116,7 @@ declare function imf:getObjectDependencies (
  :)
 declare function imf:getPODependencies (
    $database as document-node()*, 
-   $design as node()?
+   $design as item()?
 ) as item()* {
     let $guid := $design/rep:GUID/text()
     let $name := $design/rep:Name/text()
