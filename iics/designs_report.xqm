@@ -31,7 +31,7 @@ function report:start(
 
     let $connectors     := $db//rep:Item[exists(//svc:businessConnector)]
     let $connections    := $db//rep:Item[exists(//con:connection)]
-    let $processObjects := $db//rep:Item[exists(//hen:processObject)]
+    let $processObjects := $db//rep:Item[exists(rep:Entry/hen:processObject)]
     let $processes      := $db//rep:Item[exists(//sfd:process)]
     let $guides         := $db//rep:Item[exists(//sfd:avosScreenflow)]
     let $pathPrefix     := concat("/rest/",$database)
