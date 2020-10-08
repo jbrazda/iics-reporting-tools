@@ -414,7 +414,7 @@ declare function mhtml:FieldsInfo (
                  <tr>
                     <td>{data($item/@name)}</td>
                     <td>{data($item/@type)}</td>
-                    <td>{$item/sfd:options/sfd:option[@name="required"]/text()}</td>
+                    <td>{data($item/@required)}</td>
                     <td>{data($item/@description)}</td>
                     <td>{$item/sfd:options/sfd:option[@name="referenceTo"]/text()}</td>
                  </tr>

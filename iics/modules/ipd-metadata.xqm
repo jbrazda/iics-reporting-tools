@@ -15,6 +15,7 @@ declare namespace con = "http://schemas.informatica.com/socrates/data-services/2
 declare namespace cnt = "http://schemas.informatica.com/appmodules/screenflow/2014/04/avosConnectors.xsd";
 declare namespace hen = "http://schemas.active-endpoints.com/appmodules/screenflow/2011/06/avosHostEnvironment.xsd";
 declare namespace rep = "http://schemas.active-endpoints.com/appmodules/repository/2010/10/avrepository.xsd";
+declare namespace sd  ="http://schemas.active-endpoints.com/appmodules/repository/2010/10/sampleData.xsd";
 
 (:basex namespaces:)
 declare namespace output = "http://www.w3.org/2010/xslt-xquery-serialization";
@@ -424,7 +425,8 @@ declare function imf:getSubflowDependencies (
       for $subflowId in $distinctSubflowsMinusParent
             let $refFlow       := imf:getDesignByGuid($database,$subflowId)
             let $reference     := $parentDesign//(*:subflow|*:callProcess)[*:subflowGUID/text() = $subflowId and position() = 1] 
-            let $design        := $refFlow[1]/rep:Entry/* 
+            (: getting design need to filter sample data elements :)
+            let $design        := ($refFlow[1]/rep:Entry/*)[local-name(.) != 'sample-data-sets']  
             let $toGuid        := if (empty($refFlow)) then $subflowId else $refFlow[1]/rep:GUID/text()
             let $referenceTo   := if (empty($refFlow)) then $reference/*:subflowPath/text() else $refFlow[1]/rep:Name/text()
             let $referenceType := switch (local-name($design))
