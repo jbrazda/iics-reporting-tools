@@ -1,0 +1,16 @@
+Main
+
+basex.create.db
+basex.deploy.iics
+basex.download
+basex.drop.db
+basex.install
+basex.run
+basex.sample.db.create
+basex.sample.db.drop
+basex.stop
+basex.uninstall
+configure
+help
+install
+project.update.from.basex
