@@ -45,11 +45,22 @@
 	    <condition property="shell.options" value="-c">
 	        <os name="Mac OS X" />
 	    </condition>
-
+		
 	    <condition property="shell.open" value=" open ">
 	        <os name="Mac OS X" />
 	    </condition>
-
+	    	
+    	<condition property="shell.open" value=" wslview ">
+    		<and> <!-- Detecting WSL Linux runtime to open urls in windows default browser in wsl runtime -->
+    			<os name="Linux"/>
+    			<contains string="${os.version}" substring="WSL" />
+    		</and>
+        </condition>
+    	
+    	<condition property="shell.open" value=" start ">
+	        <os family="windows" />
+	    </condition>
+    		
 	    <property name="shell.open" value="" />
 
 	    <condition property="shell.options" value="-c">
@@ -106,6 +117,7 @@
         <echo level="info">eclipse.home:    ${eclipse.home}</echo>
         <echo level="info">shell:           ${shell}</echo>
         <echo level="info">os.name:         ${os.name}</echo>
+    	<echo level="info">os.family:       ${os.family}</echo>
         <echo level="info">os.version:      ${os.version}</echo>
         <echo level="info">os.arch:         ${os.arch}</echo>
         <echo level="info">user.name:       ${user.name}</echo>
@@ -129,11 +141,11 @@
         <echo level="info">Script to Install And Run Reporting Tools</echo>
         <echo level="info">Read the doc/README.MD or README.html for more details</echo>
         <echo level="info">use ant -projecthelp to see available targets</echo>
-        <property name="help.file" value="${basedir}/README.html" />
+        <property name="help.file" location="${basedir}/README.md" />
         <echo level="info">${shell.open} ${help.file}</echo>
         <exec executable="${shell}" spawn="yes">
             <arg value="${shell.options}" />
-            <arg value='${shell.open} "${help.file}"'/>
+            <arg value='${shell.open} ${help.file}'/>
         </exec>
     </target>
 
@@ -173,6 +185,7 @@
     <target name="basex.install" depends="basex.download" 
         unless="${basex.basexhttp.available}"
     	description="Installs BaseX DB and Tools">
+    	<mkdir dir="${iics.reporting.basex.home}"/>
     	<unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
         <chmod perm="ugo+rx">
             <fileset dir="${iics.reporting.basex.home}/bin">
