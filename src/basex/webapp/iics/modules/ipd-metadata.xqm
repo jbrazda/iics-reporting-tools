@@ -39,12 +39,12 @@ declare function imf:getDesignByGuid (
 
 (:~
  : Function returns file repository document resolved by the IPD object name and optional Type;
- : Object name is not gauaranteed to be unique for different types so It is recommended to use a type to avoid ambiguous results
+ : Object name is not guaranteed to be unique for different types so It is recommended to use a type to avoid ambiguous results
  :
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $objectType as xs:string? optional object Type can be one of the following (processobject, connection, screenflow, process, businesssconnector)
  : @param $objectName as xs:string  Design Object Name (rep:Name)
- : @return empty set if file is not found in ther repo or Catalog Instance of the repository file with metadata
+ : @return empty set if file is not found in the repository or Catalog Instance of the repository file with metadata
  :)
 declare function imf:getDesignByObjectName (
     $database as document-node()*,
@@ -64,7 +64,7 @@ declare function imf:getDesignByObjectName (
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $uuid as xs:string Connector UUID
  : @param $name as xs:string? Optional Connector Name
- : @return empty set if file is not found in ther repo or Calatog Instance of the repo file
+ : @return empty set if file is not found in the repository or Catalog Instance of the repository file
  :)
 declare function imf:getConnectorByUid (
    $database as document-node()*, 
@@ -80,12 +80,12 @@ declare function imf:getConnectorByUid (
 
 
 (:~
- : Function Calculates IPD Design Object Dependdencies
+ : Function Calculates IPD Design Object Dependencies
  : TODO: Implement Support for TaskFlow Dependencies
  :
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $document as node()? IPD Design Document Instance to analyze for Dependencies
- : @return empty set if file is not found in ther repo or Calatog Instance of the repo file
+ : @return empty set if file is not found in the repository or Catalog Instance of the repository file
  :)
 declare function imf:getObjectDependencies (
    $database as document-node()*, 
@@ -113,7 +113,7 @@ declare function imf:getObjectDependencies (
  :
  : @param $database as document-node()* PID Document Collection repository with file descriptors
  : @param $document as node()? IPD Design Document Instance to analyze for Dependencies
- : @return empty set if file is not found in ther repo or Calatog Instance of the repo file
+ : @return Dependecies Structure or empty set
  :)
 declare function imf:getPODependencies (
    $database as document-node()*, 
@@ -154,12 +154,12 @@ declare function imf:getPODependencies (
 
 (:~
  : Function Provides dependency tree for Designs in the Guides and Processes
- : This is a recursive function that must prvent infite loop when cyclical dependensies occur, it uses $parentFlows
+ : This is a recursive function that must prevent infinite loop when cyclical dependencies occur, it uses $parentFlows
  : as a stack of parent references which is is used to break out of cyclic dependencies
  :
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $subflowPath as xs:string  Subflow name (guide or process)
- : @param $parentFlows as xs:string  Parent flows stack mainteind during recursion 
+ : @param $parentFlows as xs:string  Parent flows stack maintained during recursion 
  : @return SubFlow Dependencies
  :)
 declare function imf:getDesignDependencies (
@@ -279,7 +279,7 @@ declare function imf:getDesignDependencies (
  :
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $connectionName as xs:string  Connection Name
- : @return Connectiomn Dependencies
+ : @return Connection Dependencies
  :)
 declare function imf:getConnectionDependencies (
    $database as document-node()*, 
@@ -400,11 +400,11 @@ declare function imf:getConnectionDependencies (
       </actions>
    </callProcess>
    </code>
- : This is a recursive function that must prvent infinite loop when cyclycal dependensies occur it uses $parentFlows
+ : This is a recursive function that must prevent infinite loop when cyclical dependencies occur it uses $parentFlows
  : as a stack of parent references which is is used to break out of cyclic dependencies
  : @param $database as node() PID Document Collection repository with file descriptors
  : @param $subflowPath as xs:string  Subflow name (guide or process)
- : @param $parentFlows as xs:string  Parent flows stack mainteind during recursion 
+ : @param $parentFlows as xs:string  Parent flows stack maintained during recursion 
  : @return SubFlow Dependencies
  :)
 declare function imf:getSubflowDependencies (

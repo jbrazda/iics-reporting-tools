@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- ====================================================================== 
      Aug 29, 2019 12:35:05 PM                                                        
 
-     project Informatica Cloud Custom Fault Alert Service Build   
+     project IICS Reporting Tools   
      description
+     This Project contain IICS Reporting Tool 
                    
      jbrazda                                                                
      ====================================================================== -->
@@ -11,98 +13,94 @@
             IICS Reportinmg Tools Build Script
     </description>
 
-  
     <target name="-init">
-    	<property file="build.properties" />
-    	<property file="${iics.reporting.config}" />
-    	        
-    	<property environment="env" /> 
+        <property file="build.properties" />
+    	<property name="iics.reporting.config.location" location="${iics.reporting.config}" />
+        <property file="${iics.reporting.config.location}" />
+                
+        <property environment="env" /> 
 
-	    <condition property="isUnix">
-	        <os family="unix" />
-	    </condition>
+        <condition property="isUnix">
+            <os family="unix" />
+        </condition>
 
-	    <condition property="isWindows">
-	        <os family="windows" />
-	    </condition>
+        <condition property="isWindows">
+            <os family="windows" />
+        </condition>
 
-	    <condition property="exec.ext" value="">
-	        <os family="unix" />
-	    </condition>
+        <condition property="exec.ext" value="">
+            <os family="unix" />
+        </condition>
 
-	    <condition property="exec.ext" value=".bat">
-	        <os family="windows" />
-	    </condition>
+        <condition property="exec.ext" value=".bat">
+            <os family="windows" />
+        </condition>
 
-	    <condition property="shell" value="bash">
-	        <os family="unix" />
-	    </condition>
+        <condition property="shell" value="bash">
+            <os family="unix" />
+        </condition>
 
-	    <condition property="shell" value="cmd.exe">
-	        <os family="windows" />
-	    </condition>
+        <condition property="shell" value="cmd.exe">
+            <os family="windows" />
+        </condition>
 
-	    <condition property="shell.options" value="-c">
-	        <os name="Mac OS X" />
-	    </condition>
-		
-	    <condition property="shell.open" value=" open ">
-	        <os name="Mac OS X" />
-	    </condition>
-	    	
-    	<condition property="shell.open" value=" wslview ">
-    		<and> <!-- Detecting WSL Linux runtime to open urls in windows default browser in wsl runtime -->
-    			<os name="Linux"/>
-    			<contains string="${os.version}" substring="WSL" />
-    		</and>
+        <condition property="shell.options" value="-c">
+            <os name="Mac OS X" />
+        </condition>
+
+        <condition property="shell.open" value=" open ">
+            <os name="Mac OS X" />
+        </condition>
+            
+        <condition property="shell.open" value=" wslview ">
+            <and> <!-- Detecting WSL Linux runtime to open urls in windows default browser in wsl runtime -->
+                <os name="Linux"/>
+                <contains string="${os.version}" substring="WSL" />
+            </and>
+        </condition>
+        
+        <condition property="shell.open" value=" start ">
+            <os family="windows" />
+        </condition>
+            
+        <property name="shell.open" value="" />
+
+        <condition property="shell.options" value="-c">
+            <os family="unix" />
+        </condition>
+
+        <condition property="shell.options" value="/c">
+            <os family="windows" />
+        </condition>
+            	
+    	<condition property="basex.bin" value="${basex.home}/bin">
+    	    <and>
+    	    	  <available file="${iics.reporting.config.location}" type="file"/>
+            </and>
         </condition>
     	
-    	<condition property="shell.open" value=" start ">
-	        <os family="windows" />
-	    </condition>
-    		
-	    <property name="shell.open" value="" />
-
-	    <condition property="shell.options" value="-c">
-	        <os family="unix" />
-	    </condition>
-
-	    <condition property="shell.options" value="/c">
-	        <os family="windows" />
-	    </condition>
-    	
-    	<path id="basex-PATH">
-    	  <pathelement path="${env.PATH}"/>
-    	  <pathelement path="${env.Path}"/>
-    	  <pathelement location="${iics.reporting.basex.home}/bin"/>	
-    	</path>
-    	<property name="basex.PATH" refid="basex-PATH"/>     
-    	
+        <path id="basex-PATH">
+            <pathelement path="${env.PATH}"/>
+            <pathelement path="${env.Path}"/>
+            <pathelement location="${basex.bin}"/>
+        </path>
+        <property name="PATH.basex" refid="basex-PATH"/>
+        
         <!-- BaseX Installation Checks-->
-        <condition property="basex.cmd.available" value="true">
-        	<or>
-        		<available file="basex" filepath="${basex.PATH}" property="basex.present"/>
-        		<available file="basex.bat" filepath="${basex.PATH}" property="basex.present"/>
-        	</or>
+    	<condition property="available.basex" value="true" else="false">
+            <available filepath="${PATH.basex}" file="basex${exec.ext}" property="basex.present" />
         </condition>
-    	<condition property="basex.basexgui.available" value="true">
-    		<or>
-                <available file="basexgui" filepath="${basex.PATH}" property="basexgui.present"/>
-                <available file="basexgui.bat" filepath="${basex.PATH}" property="basexgui.present"/>
-            </or>
+        <condition property="available.basexgui" value="true" else="false">
+            <available filepath="${PATH.basex}" file="basexgui${exec.ext}" property="basexgui.present" />
         </condition>
-    	<condition property="basex.basexhttp.available" value="true">
-            <or>
-                <available file="basexhttp" filepath="${basex.PATH}" property="basexhttp.present"/>
-                <available file="basexserver.bat" filepath="${basex.PATH}" property="basexhttp.present"/>
-            </or>
+        <condition property="available.basexhttp" value="true" else="false">
+            <available filepath="${PATH.basex}" file="basexhttp${exec.ext}" property="basexhttp.present" />
         </condition>
-    	<condition property="basex.basexhttpstop.available" value="true">
-            <or>
-                <available file="basexhttpstop" filepath="${basex.PATH}" property="basexhttpstop.present"/>
-                <available file="basexhttpstop.bat" filepath="${basex.PATH}" property="basexhttpstop.present"/>
-            </or>
+        <condition property="available.basexhttpstop" value="true" else="false">
+            <available filepath="${PATH.basex}" file="basexhttpstop${exec.ext}" property="basexhttpstop.present" />
         </condition>
+
+        <property name="initialized" value="true" />
     </target>
 
 
@@ -117,7 +115,7 @@
         <echo level="info">eclipse.home:    ${eclipse.home}</echo>
         <echo level="info">shell:           ${shell}</echo>
         <echo level="info">os.name:         ${os.name}</echo>
-    	<echo level="info">os.family:       ${os.family}</echo>
+        <echo level="info">os.family:       ${os.family}</echo>
         <echo level="info">os.version:      ${os.version}</echo>
         <echo level="info">os.arch:         ${os.arch}</echo>
         <echo level="info">user.name:       ${user.name}</echo>
@@ -127,17 +125,23 @@
         <echo level="info">env.LANG:        ${env.LANG}</echo>
         <echo level="info">env.SHELL:       ${env.SHELL}</echo>
         <echo level="info">env.PATH:        ${env.PATH}</echo>
+    	<echo level="info">env.Path:        ${env.Path}</echo>
         <echo level="info">env.JAVA_HOME:   ${env.JAVA_HOME}</echo>
-    	<echo level="info">basex.PATH:      ${basex.PATH}</echo>
-    	<echo level="info">Basex HTTP Available: ${basex.basexhttp.available}</echo>
-        <echo level="info">iics.reporting.basex.home:   ${iics.reporting.basex.home}</echo>
+        <echo level="info">basex.home:      ${basex.home}</echo>
+    	<echo level="info">basex.bin:       ${basex.bin}</echo>
+    	<echo level="info">config.location:         ${iics.reporting.config.location}</echo>
+        <echo level="info">available.basex:         ${available.basex}</echo>
+        <echo level="info">available.basexhttp:     ${available.basexhttp}</echo>
+        <echo level="info">available.basexhttpstop: ${available.basexhttpstop}</echo>
+        <echo level="info">available.basexgui:      ${available.basexgui}</echo>
+
         <echo level="info">========================================</echo>
         <property name="env.info.displayed" value="true" />
     </target>
 
 
     <target name="help"  depends="-env.info"
-    	   description="help - describes how to use this script">
+           description="help - describes how to use this script">
         <echo level="info">Script to Install And Run Reporting Tools</echo>
         <echo level="info">Read the doc/README.MD or README.html for more details</echo>
         <echo level="info">use ant -projecthelp to see available targets</echo>
@@ -152,123 +156,210 @@
 
 
     <target name="basex.download" depends="-env.info"
-        unless="${basex.cmd.available}"
-    	description="Download BaseX">
+        unless="${available.basex}"
+        description="Download BaseX">
         <!-- Download OS Specific version of the tool-->
-        <echo level="info">Basex Available: ${basex.cmd.available}</echo>
+        <echo level="info">Basex Available: ${available.basex}</echo>
         <echo level="info">Downloading: ${basex.download.url}</echo>
-        <get src="${basex.download.url}" dest="${iics.reporting.downloads.dir}" usetimestamp="true"   />
+        <get src="${basex.download.url}" dest="${basex.downloads.dir}" usetimestamp="true"   />
     </target>
-    
-    
-    <target name="configure" unless="iics.reporting.basex.home" 
-    	depends="-env.info"
-    	description="Configure Reporting Tool">
+
+    <target name="basex.download.update" depends="-env.info"
+    	if="${available.basex}" description="Download BaseX Update">
+        <echo level="info">Basex Available: ${available.basex}</echo>
+        <echo level="info">Downloading: ${basex.upgrade.url}</echo>
+        <get src="${basex.upgrade.url}" dest="${basex.downloads.dir}/${basex.upgrade.file}" usetimestamp="true" verbose="true" />
+    </target>
+
+
+    <target name="basex.configure" depends="-env.info" description="Configure Reporting Tool">
         <echo level="info">IICS Reporting Configuration:</echo>
+        <input defaultvalue="${default.basex.download.url}" message="BaseX Download URL:" addproperty="basex.download.url"/>
+        <property name="default.downloads.dir.location" location="${default.downloads.dir}" />
         
-    	<input defaultvalue="${default.iics.reporting.downloads.dir}" message="Download BaseX To: " addproperty="iics.reporting.downloads.dir"></input>
-        <input defaultvalue="${default.iics.reporting.basex.home}" message="Install BaseX To:" addproperty="iics.reporting.basex.home"></input>    	        
-    	<echoproperties  destfile="${iics.reporting.config}">
-    	  <propertyset>
-    	    <propertyref prefix="iics.reporting."/>
-    	  </propertyset>
-    	</echoproperties>
-    	<echo level="info">Configuration file written to ${iics.reporting.config}</echo>
+        <input defaultvalue="${default.downloads.dir.location}" message="Download BaseX To: " addproperty="basex.downloads.dir"/>
+        <property name="default.basex.home.loaction" location="${default.basex.home}" />
+        <input defaultvalue="${default.basex.home.loaction}" message="Install BaseX To:" addproperty="basex.home"/>
+        <property name="default.basex.java_home.location" location="${env.JAVA_HOME}" />
+        <input defaultvalue="${java.home}" message="Set BaseX Java Home:" addproperty="basex.java_home"/>
+
+        <echoproperties destfile="${iics.reporting.config}">
+            <propertyset>
+                <propertyref prefix="basex." />
+            </propertyset>
+        </echoproperties>
+        <echo level="info">Configuration file written to ${iics.reporting.config}</echo>
     </target>
-	
-	<target name="install"
-		description="Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP server"
-		depends="configure,basex.install,basex.deploy.iics,basex.run">
-	
-	</target>
-    
+
+    <target name="install.all" description="Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP server" depends="
+        basex.configure,
+    	-init,
+        basex.install,
+        basexhttp.start,
+        basex.deploy.webapps">
+    </target>
+
     <target name="basex.install" depends="basex.download" 
-        unless="${basex.basexhttp.available}"
-    	description="Installs BaseX DB and Tools">
-    	<mkdir dir="${iics.reporting.basex.home}"/>
-    	<unzip dest="${iics.reporting.basex.home}/.." overwrite="true" src="${iics.reporting.downloads.dir}/${basex.download.file}" ></unzip>
+    	unless="${available.basex}" description="Installs BaseX DB and Tools">
+        <mkdir dir="${basex.home}"/>
+        <unzip dest="${basex.home}/.." overwrite="true" src="${basex.downloads.dir}/${basex.download.file}">
+        </unzip>
         <chmod perm="ugo+rx">
-            <fileset dir="${iics.reporting.basex.home}/bin">
-                <include name="basex"/>
-                <include name="basexcli"/>
-                <include name="basexgui"/>
-                <include name="basexhttp"/>
-                <include name="basexhttpstop"/>
-                <include name="basexserver"/>
-                <include name="basexserverstop"/>                    
+            <fileset dir="${basex.home}/bin">
+                <include name="basex" />
+                <include name="basexcli" />
+                <include name="basexgui" />
+                <include name="basexhttp" />
+                <include name="basexhttpstop" />
+                <include name="basexserver" />
+                <include name="basexserverstop" />
             </fileset>
         </chmod>
-        <property name="basex.basexhttp.available" value="true"/>
-    </target>
-	
-    <target name="confirm.basex.uninstall">
-        <input addproperty="basex.uninstall.confirmed" message="Do you really want to uninstall BaseX from ${iics.reporting.basex.home}?" defaultvalue="no" validargs="yes,no"></input>
+        <property name="available.basexhttp" value="true" />
     </target>
     
-	<target name="basex.uninstall" depends="-env.info,basex.stop,confirm.basex.uninstall" 
-	    if="${basex.uninstall.confirmed}"
-        description="Stops and Uninstall BaseX Server and Tools">
-	 	<delete dir="${iics.reporting.basex.home}" failonerror="true" verbose="true"/>
-    </target>
 	
-	<target name="basex.run" depends="-env.info,check.basexhttp.up"
-		   unless="${basex.http.up}" description="Run BaseX HTTP Server">
-        <exec executable="${iics.reporting.basex.home}/bin/basexhttp${exec.ext}" spawn="true"  dir="${iics.reporting.basex.home}" >
+	<target name="upgrade.load.config">
+        <property file="build.properties" />
+        <property name="iics.reporting.config.location" location="${iics.reporting.config}" />
+        <property file="${iics.reporting.config.location}" />
+	</target>
+    <target name="upgrade.config" if="iics.reporting.basex.home" 
+    	depends="upgrade.load.config">
+    	
+    	<echo level="info">Udating IICS Reporting Configuration:</echo>
+        <input defaultvalue="${default.basex.download.url}" message="BaseX Download URL:" addproperty="basex.download.url"/>
+        <property name="default.downloads.dir.location" location="${default.iics.reporting.downloads.dir}" />
+        <input defaultvalue="${default.downloads.dir.location}" message="Download BaseX To: " addproperty="basex.downloads.dir"/>
+        <property name="default.basex.home.loaction" location="${default.basex.home}" />
+        <input defaultvalue="${default.basex.home.loaction}" message="Install BaseX To:" addproperty="basex.home"/>
+        <property name="default.basex.java_home.location" location="${env.JAVA_HOME}" />
+        <input defaultvalue="${java.home}" message="Set BaseX Java Home:" addproperty="basex.java_home"/>
+
+        <echoproperties destfile="${iics.reporting.config}">
+            <propertyset>
+                <propertyref prefix="basex." />
+            </propertyset>
+        </echoproperties>
+        <echo level="info">Configuration file written to ${iics.reporting.config}</echo>
+    </target>
+
+	
+    <target name="basex.upgrade" depends="upgrade.config,basexhttp.stop,basex.download.update" if="${available.basex}" description="Upgrades BaseX Runtime to Latest Version">
+        <delete verbose="true">
+            <fileset dir="${basex.home}">
+                <exclude name="data/**" />
+                <exclude name="webapp/iics/**" />
+            	<exclude name="webapp/b2b/**" />
+            </fileset>
+        </delete>
+        <unzip dest="${basex.home}/.." overwrite="true" src="${basex.downloads.dir}/${basex.upgrade.file}">
+        </unzip>
+        <chmod perm="ugo+rx">
+            <fileset dir="${basex.home}/bin">
+                <include name="basex" />
+                <include name="basexcli" />
+                <include name="basexgui" />
+                <include name="basexhttp" />
+                <include name="basexhttpstop" />
+                <include name="basexserver" />
+                <include name="basexserverstop" />
+            </fileset>
+        </chmod>
+        <property name="available.basexhttp" value="true" />
+    </target>
+
+    <target name="confirm.basex.uninstall">
+        <input addproperty="basex.uninstall.confirmed" message="Do you really want to uninstall BaseX from ${basex.home}?" defaultvalue="no" validargs="yes,no">
+        </input>
+    </target>
+
+    <target name="basex.uninstall" depends="-env.info,basexhttp.stop,confirm.basex.uninstall" if="${basex.uninstall.confirmed}" description="Stops and Uninstall BaseX Server and Tools">
+        <delete dir="${basex.home}" failonerror="true" verbose="true" />
+    </target>
+
+    <target name="basexhttp.start" depends="-env.info,check.basexhttp.up" unless="${basex.http.up}" description="Run BaseX HTTP Server">
+        <exec executable="${basex.home}/bin/basexhttp${exec.ext}" spawn="true" dir="${basex.home}">
             <env key="JAVA_HOME" value="${basex.java_home}" />
-            <env key="PATH" value="${basex.PATH}" />
+            <env key="PATH" value="${PATH.basex}" />
         </exec>
         <waitfor checkevery="500" checkeveryunit="millisecond" maxwaitunit="minute" maxwait="1" timeoutproperty="basex.http.timeout">
-            <http url="${basex.http.base_url}/"/>
+            <http url="${basex.http.base_url}/" />
         </waitfor>
-	    <fail if="basex.http.timeout" message="Timeout Waiting for BaseX HTTP Server to start"/>
-	    <echo level="info">Basex HTTP Started on ${basex.http.base_url}</echo>
-	    <echo level="info">IICS Repoting available on ${basex.http.base_url}/iics</echo>
-	</target>
-	
-	
-	<target name="check.basexhttp.up" depends="-env.info">
-	    <condition property="basex.http.up" value="true">
-	    	<and>
-	    		  <http url="${basex.http.base_url}/"/>
-	    		  <equals arg1="${basex.basexhttp.available}" arg2="true"/>
-	    	</and>
-	    </condition>
-		<condition property="basex.http.up" value="false">
-		    <not>
-		    	<equals arg1="${basex.http.up}" arg2="true"/>
-		    </not>
-        </condition>
-		<echo level="info">Basex Installation Available: ${basex.basexhttp.available}</echo>
-		<echo level="info">Basex HTTP ${basex.http.base_url} available: ${basex.http.up}</echo>
-	</target>
-	
-	<target name="basex.stop" 
-		depends="-env.info,check.basexhttp.up" 
-		if="${basex.http.up}"
-	    description="Stop BaseX HTTP Server">
-	    <exec executable="${iics.reporting.basex.home}/bin/basexhttpstop${exec.ext}"  dir="${iics.reporting.basex.home}" >
-	        <env key="JAVA_HOME" value="${basex.java_home}" />
-	        <env key="PATH" value="${basex.PATH}" />
-	    </exec>
+        <fail if="basex.http.timeout" message="Timeout Waiting for BaseX HTTP Server to start" />
+        <echo level="info">Basex HTTP Started on ${basex.http.base_url}</echo>
+        <echo level="info">IICS Repoting available on ${basex.http.base_url}/iics</echo>
     </target>
-	
-    <target name="basex.deploy.iics" depends="-env.info" 
-    	if="${basex.basexhttp.available}"
-    	description="Deploys IICS Reporting pages to BaseX Http Server to basex_home/webapp/iics">
-        <copy todir="${iics.reporting.basex.home}/webapp" verbose="true" overwrite="true">
-            <fileset dir="${basedir}">
-                <include name="iics/**"/>
+
+
+    <target name="check.basexhttp.up" depends="-env.info">
+        <condition property="basex.http.up" value="true" else="false">
+            <and>
+                <http url="${basex.http.base_url}/" />
+                <equals arg1="${available.basexhttp}" arg2="true" />
+            </and>
+        </condition>
+
+        <echo level="info">Basex HTTP Available: ${available.basexhttp}</echo>
+        <echo level="info">Basex HTTP ${basex.http.base_url} UP: ${basex.http.up}</echo>
+    </target>
+
+    <target name="basexhttp.stop" depends="-env.info,check.basexhttp.up" if="${basex.http.up}" description="Stop BaseX HTTP Server">
+        <exec executable="${basex.home}/bin/basexhttpstop${exec.ext}" dir="${basex.home}">
+            <env key="JAVA_HOME" value="${basex.java_home}" />
+            <env key="PATH" value="${PATH.basex}" />
+        </exec>
+    </target>
+
+    <target name="basex.gui" depends="-env.info" if="${available.basexgui}" description="Start BaseX GUI">
+        <exec executable="${basex.home}/bin/basexgui${exec.ext}" dir="${basedir}" spawn="true">
+            <env key="JAVA_HOME" value="${basex.java_home}" />
+            <arg line="-d ${basedir}" />
+        </exec>
+    </target>
+
+
+    <target name="basex.deploy.webapps" depends="-env.info" if="${available.basexhttp}" description="Deploys Custom Webapps to BaseX Http Server to basex_home/webapp">
+        <copy todir="${basex.home}/webapp" verbose="true" overwrite="true">
+            <fileset dir="${basedir}/src/basex/webapp">
+                <include name="**" />
+            </fileset>
+        </copy>
+        <!-- Open Deployed web app in default browser -->
+        <property name="basex.app.url" value="${basex.http.base_url}/iics">
+        </property>
+        <exec executable="${shell}" spawn="yes">
+            <arg value="${shell.options}" />
+            <arg line="'${shell.open} ${basex.app.url}'" />
+        </exec>
+    </target>
+
+    <target name="project.update.from.basex" depends="-env.info" if="${available.basexhttp}" description="Updatesdeployed from basex http server webapp/iics dir ">
+        <copy todir="${basedir}/src/basex/webapp" verbose="true" overwrite="true">
+            <fileset dir="${basex.home}/webapp">
+                <include name="iics/**" />
             </fileset>
         </copy>
     </target>
+
+    <target name="basex.create.db" depends="basex.install" description="Create new BaseX Database from Source file, archive or directory">
+        <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set" />
+        <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set" />
+        <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}" />
+    </target>
+
+
+    <target name="basex.drop.db" depends="basex.install" description="Drop Existing BaseX DB by name">
+        <fail unless="basex.drop.db.name" message="Required property 'basex.create.db.name' is not set" />
+        <basex.dropDB dbname="${basex.drop.db.name}" />
+    </target>
     
-    
-    <target name="basex.sample.db.create" depends="-env.info"
+	<target name="basex.sample.db.create" depends="-env.info"
         description="Create Sample DEMO_DB">
-        <get src="${iics.reporting.sample.url}" dest="${default.iics.reporting.downloads.dir}/${iics.reporting.sample.file}" usetimestamp="true"/>
+        <get src="${iics.reporting.sample.url}" dest="${basex.downloads.dir}/${iics.reporting.sample.file}" usetimestamp="true"/>
         <antcall target="basex.create.db">
             <param name="basex.create.db.name" value="DEMO_DB"/>
-            <param name="basex.create.db.source" value="${default.iics.reporting.downloads.dir}/${iics.reporting.sample.file}"/>
+            <param name="basex.create.db.source" value="${basex.downloads.dir}/${iics.reporting.sample.file}"/>
         </antcall>
     </target>
     
@@ -279,60 +370,50 @@
         </antcall>
     </target>
 	
-	<target name="project.update.from.basex" depends="-env.info" 
-        if="${basex.basexhttp.available}"
-        description="Updates iics reporting modules and sources from basex http server webapp/iics dir ">
-        <copy todir="${basedir}" verbose="true" overwrite="true">
-            <fileset dir="${iics.reporting.basex.home}/webapp">
-                <include name="iics/**"/>
-            </fileset>
-        </copy>
-    </target>
-	
-	<target name="basex.create.db" depends="basex.install"
-	    description="Create new BaseX Database from Source file, archive or directory">
-        <fail unless="basex.create.db.name" message="Required property 'basex.create.db.name' is not set"/>
-        <fail unless="basex.create.db.source" message="Required property 'basex.create.db.source' isn ot set"/>
-        <basex.createDB dbname="${basex.create.db.name}" dbsource="${basex.create.db.source}"/>
-	</target>
-    
-    
-    <target name="basex.drop.db" depends="basex.install"
-        description="Drop Existing BaseX DB by name">
-           <fail unless="basex.drop.db.name" message="Required property 'basex.create.db.name' is not set"/>
-           <basex.dropDB dbname="${basex.drop.db.name}"/>
-    </target>
-	
-	<macrodef name="basex.createDB">
-	   <attribute name="dbname" description="Database Name"/>
-	   <attribute name="dbsource" description="DB Source Directory, single xml file or zip file"/>
-       <sequential>
-       	<fail unless="${basex.cmd.available}"/>
-       	<property name="basex.command.createdb_@{dbname}" 
-       	                value='-c "CREATE DATABASE @{dbname} @{dbsource}"' />
-       	<echo level="info">Running basex ${basex.command.createdb_@{dbname}}</echo>
-       	<exec dir="${basedir}" executable="${iics.reporting.basex.home}/bin/basex${exec.ext}">
-       	    <env key="JAVA_HOME" value="${basex.java_home}" />
-            <env key="PATH" value="${basex.PATH}" />
-            <arg line="${basex.command.createdb_@{dbname}}" />
-        </exec>
-       </sequential>	
-	</macrodef>
-	
-	
-	<macrodef name="basex.dropDB">
-       <attribute name="dbname" description="Database Name"/>
-       <sequential>
-        <property name="basex.command.dropdb_@{dbname}" 
-                        value='-c "DROP DATABASE @{dbname}"' />
-        <echo level="info">Running basex ${basex.command.dropdb_@{dbname}}</echo>
-        <exec dir="${basedir}" executable="${iics.reporting.basex.home}/bin/basex${exec.ext}">
-            <env key="JAVA_HOME" value="${basex.java_home}" />
-            <env key="PATH" value="${basex.PATH}" />
-            <arg line="${basex.command.dropdb_@{dbname}}" />
-        </exec>
-       </sequential>    
+    <macrodef name="basex.createDB">
+        <attribute name="dbname" description="Database Name" />
+        <attribute name="dbsource" description="DB Source Directory, single xml file or zip file" />
+        <sequential>
+            <fail unless="${available.basex}" />
+            <property name="basex.command.createdb_@{dbname}" value='-c "CREATE DATABASE @{dbname} @{dbsource}"' />
+            <echo level="info">Running basex ${basex.command.createdb_@{dbname}}</echo>
+            <exec dir="${basedir}" executable="${basex.home}/bin/basex${exec.ext}">
+                <env key="JAVA_HOME" value="${basex.java_home}" />
+                <env key="PATH" value="${env.Path}${path.separator}${env.PATH}${path.separator}${basex.bin}" />
+                <arg line="${basex.command.createdb_@{dbname}}" />
+            </exec>
+        </sequential>
     </macrodef>
-	
-    
+
+
+    <macrodef name="basex.dropDB">
+        <attribute name="dbname" description="Database Name" />
+        <sequential>
+            <fail unless="${available.basex}" />
+            <property name="basex.command.dropdb_@{dbname}" value='-c "DROP DATABASE @{dbname}"' />
+            <echo level="info">Running basex ${basex.command.dropdb_@{dbname}}</echo>
+            <exec dir="${basedir}" executable="${basex.home}/bin/basex${exec.ext}" failonerror="false">
+                <env key="JAVA_HOME" value="${basex.java_home}" />
+                <env key="PATH" value="${env.Path}${path.separator}${env.PATH}${path.separator}${basex.bin}" />
+                <arg line="${basex.command.dropdb_@{dbname}}" />
+            </exec>
+        </sequential>
+    </macrodef>
+
+
+    <macrodef name="basex.runXQ">
+        <attribute name="xq" description="Xquery Main Module" />
+        <attribute name="params" description="Parameters" default="" />
+        <sequential>
+            <fail unless="${available.basex}" />
+            <property name="basex.command.runxq_@{xq}" value='@{xq} @{params}' />
+            <echo level="info">Running basex ${basex.command.runxq_@{xq}}</echo>
+            <exec dir="${basedir}/xquery" executable="${basex.home}/bin/basex${exec.ext}">
+                <env key="JAVA_HOME" value="${basex.java_home}" />
+                <env key="PATH" value="${env.Path}${path.separator}${env.PATH}${path.separator}${basex.bin}" />
+                <arg line="${basex.command.runxq_@{xq}}" />
+            </exec>
+        </sequential>
+    </macrodef>
+
 </project>

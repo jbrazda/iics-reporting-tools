@@ -1,7 +1,7 @@
 module namespace iics = 'iics/design';
 
 import module namespace html   = 'iics/html' at 'modules/html.xqm';
-import module namespace mhtml  = 'iics/ipd-metafata-html' at 'modules/ipd-metadata-html.xqm';
+import module namespace mhtml  = 'iics/ipd-metadata-html' at 'modules/ipd-metadata-html.xqm';
 import module namespace imf    = 'iics/imf' at 'modules/ipd-metadata.xqm';
 import module namespace functx = 'http://www.functx.com';
 

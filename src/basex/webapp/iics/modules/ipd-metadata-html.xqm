@@ -5,7 +5,7 @@
 : @since Sep 2019
 : @version 1.0
 :)
-module namespace mhtml = 'iics/ipd-metafata-html';
+module namespace mhtml = 'iics/ipd-metadata-html';
 
 import module namespace imf  = 'iics/imf' at 'ipd-metadata.xqm';
 import module namespace util = 'iics/util' at 'util.xqm';

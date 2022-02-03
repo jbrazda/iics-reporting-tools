@@ -14,6 +14,7 @@ See [Other Screenshots](doc/screenshots.md)
   - [Installation of the Tool](#installation-of-the-tool)
     - [Pre-requisites](#pre-requisites)
   - [Install Steps](#install-steps)
+  - [Upgrading from previous Version](#upgrading-from-previous-version)
   - [Create Exported Objects Database](#create-exported-objects-database)
   - [Ant Script main Properties File](#ant-script-main-properties-file)
   - [Target basex.create.db](#target-basexcreatedb)
@@ -23,6 +24,7 @@ See [Other Screenshots](doc/screenshots.md)
   - [Parameters](#parameters-1)
   - [Example Use in Ant Script](#example-use-in-ant-script-1)
   - [Release Notes](#release-notes)
+    - [Release Feb 2022](#release-feb-2022)
     - [Release 2019-12-0](#release-2019-12-0)
 
 <!-- /TOC -->
@@ -55,7 +57,7 @@ It can be plugged-in into the automated Build process to Publish And  make onlin
 - JAVA JRE 1.8 or newer
 - Apache Ant 1.9 or newer
 
-> Note: By default basex runtime would be installed in the `/opt/java/library/basex` folder on Mac or Linux you have to create java folder and grant permissions to it as follows. You can set location to a different folder if desired in step 2 of the installation guide
+> Note: By default BaseX runtime would be installed in the `/opt/java/library/basex` folder on Mac or Linux you have to create java folder and grant permissions to it as follows. You can set location to a different folder if desired in step 2 of the installation guide
 
 ```shell
 mkdir /opt/java
@@ -63,22 +65,47 @@ mkdir /opt/java
 chown jbrazda:jbrazda /opt/java
 ```
 
+> Note you can follow My guide to setup these [here](https://github.com/jbrazda/Informatica/blob/master/Guides/InformaticaCloud/set_development_environment.md)
+
 ## Install Steps
 
-Simplest method is to follow these steps
-
 1. Clone this repository
-2. Run ant target `ant install`
+2. Run ant target
+  
+    ```shell
+    ant basex.configure
+    ```
 
-You can also follow  these steps
+3. Run ant target ``
+  
+    ```shell
+    ant basex.install
+    ```
 
-1. Clone this repository
-2. Run ant target `ant configure`
-3. Run ant target `ant basex.install`
-4. Run ant target `ant basex.deploy.iics`
-5. Run ant target `ant basex.run`
+4. Run ant target
+  
+    ```shell
+    ant basex.deploy.webapps
+    ```
+
+5. Run ant target
+  
+    ```shell
+    ant basexhttp.start
+    ```
+
 6. Create Database from IICS Exported Package Zip file
 7. Go tp Go to [http://localhost:8984/iics](http://localhost:8984/iics)
+
+## Upgrading from previous Version
+
+1. Update Repository From github
+  
+    ```shell
+    git pull --rebase
+    ```
+
+2. run ant `ant basex.upgrade`
 
 ## Create Exported Objects Database
 
@@ -99,26 +126,29 @@ basex -c "CREATE DATABASE IICS_ICLAB_SRC_2019_07_08 /Users/jbrazda/git/icrt_comm
 Ant Target Parameters and Examples
 
 ```text
-Buildfile: /Users/jbrazda/git/iics-reporting-tools/build.xml
+Buildfile: /home/jbrazda/git/github/jbrazda/iics-reporting-tools/build.xml
 
-            IICS Reportinmg Tools Build Script
+            IICS Reporting Tools Build Script
 
 Main targets:
 
- basex.create.db           Create new BaseX Database from Source file, archive or directory
- basex.deploy.iics         Deploys IICS Reporting pages to BaseX Http Server to basex_home/webapp/iics
- basex.download            Download BaseX
- basex.drop.db             Drop Existing BaseX DB by name
- basex.install             Uninstalls BaseX DB and Tools
- basex.run                 Run BaseX HTTP Server
- basex.sample.db.create    Create Sample DEMO_DB
- basex.sample.db.drop      Drop Sample DEMO_DB
- basex.stop                Stop BaseX HTTP Server
- basex.uninstall           Stops and Uninstall BaseX Server and Tools
- configure                 Configure Reporting Tool
- help                      help - describes how to use this script
- install                   Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP Server
- project.update.from.basex  Updates iics reporting modules and sources from basex http server webapp/iics dir
+ basex.configure            Configure Reporting Tool
+ basex.create.db            Create new BaseX Database from Source file, archive or directory
+ basex.deploy.webapps       Deploys Custom Webapps to BaseX Http Server to basex_home/webapp
+ basex.download             Download BaseX
+ basex.download.update      Download BaseX Update
+ basex.drop.db              Drop Existing BaseX DB by name
+ basex.gui                  Start BaseX GUI
+ basex.install              Installs BaseX DB and Tools
+ basex.sample.db.create     Create Sample DEMO_DB
+ basex.sample.db.drop       Drop Sample DEMO_DB
+ basex.uninstall            Stops and Uninstall BaseX Server and Tools
+ basex.upgrade              Upgrades BaseX Runtime to Latest Version
+ basexhttp.start            Run BaseX HTTP Server
+ basexhttp.stop             Stop BaseX HTTP Server
+ help                       help - describes how to use this script
+ install.all                Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP server
+ project.update.from.basex  Updates sources from basex http server webapp/iics dir
 ```
 
 ## Ant Script main Properties File
@@ -188,6 +218,41 @@ This target Will create New database Typically from zip archive as a part of the
 ```
 
 ## Release Notes
+
+### Release Feb 2022
+
+This version brings range of changes toi installation and maintenance of the reporting tool
+
+- upgraded BaseX Runtime to Version 9.6
+- Refactored build.xml to Install and manage
+- Added new ant targets to Self update and automated upgrade of the basex to latest available version
+- some previous target names have changed see current targets
+
+```text
+Buildfile: build.xml
+
+            IICS Reporting Tools Build Script
+
+Main targets:
+
+ basex.configure            Configure Reporting Tool
+ basex.create.db            Create new BaseX Database from Source file, archive or directory
+ basex.deploy.webapps       Deploys Custom Webapps to BaseX Http Server to basex_home/webapp
+ basex.download             Download BaseX
+ basex.download.update      Download BaseX Update
+ basex.drop.db              Drop Existing BaseX DB by name
+ basex.gui                  Start BaseX GUI
+ basex.install              Installs BaseX DB and Tools
+ basex.sample.db.create     Create Sample DEMO_DB
+ basex.sample.db.drop       Drop Sample DEMO_DB
+ basex.uninstall            Stops and Uninstall BaseX Server and Tools
+ basex.upgrade              Upgrades BaseX Runtime to Latest Version
+ basexhttp.start            Run BaseX HTTP Server
+ basexhttp.stop             Stop BaseX HTTP Server
+ help                       help - describes how to use this script
+ install.all                Installs BaseX Tools, Deploys IICS Reporting App and runs BaseX HTTP server
+ project.update.from.basex  Updates sources from basex http server webapp/iics dir
+```
 
 ### Release 2019-12-0
 

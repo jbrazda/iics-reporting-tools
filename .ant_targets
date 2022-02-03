@@ -1,16 +1,19 @@
 Main
 
+basex.configure
 basex.create.db
-basex.deploy.iics
+basex.deploy.webapps
 basex.download
+basex.download.update
 basex.drop.db
+basex.gui
 basex.install
-basex.run
 basex.sample.db.create
 basex.sample.db.drop
-basex.stop
 basex.uninstall
-configure
+basex.upgrade
+basexhttp.start
+basexhttp.stop
 help
-install
+install.all
 project.update.from.basex

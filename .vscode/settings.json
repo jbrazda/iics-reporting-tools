@@ -1,15 +1,18 @@
 {
     "markdown-toc.anchorMode": "github.com",
     "cSpell.words": [
+        "basex",
+        "basexhttp",
         "Bitbucket",
         "Buildfile",
-        "Diics",
-        "Jira",
         "deployer",
+        "Diics",
         "iclab",
+        "Jira",
         "mkdir",
         "packagesrc",
         "projecthelp",
-        "sbin"
+        "sbin",
+        "webapps"
     ]
 }
