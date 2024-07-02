@@ -71,7 +71,7 @@ function report:start(
     let $createdByStats :=
         <stats 
             total-items="{count($items)}" 
-            distinct-Status="{count(distinct-values($items/*:PublicationStatus))}">
+            distinct-CreatedBy="{count(distinct-values($items/*:CreatedBy))}">
             {
             for $item in $items
             let $g := $item/*:CreatedBy/text()
@@ -82,8 +82,21 @@ function report:start(
             <createdBy name="{$g}" count="{count($item)}"/>
             }
         </stats>
-
-
+    let $countModifiers :=  $db//*:Item[*:MimeType != 'application/xml+processobject' and not(empty(*:ModifiedBy)) ]
+    let $modifiedByStats :=
+        <stats 
+            total-items="{count($items)}" 
+            distinct-ModifiedBy="{count(distinct-values($items/*:ModifiedBy))}">
+            {
+            for $item in $items
+            let $g := $item/*:ModifiedBy/text()
+            group by $g 
+            order by $g
+            count $id
+            return 
+            <modifiedBy name="{$g}" count="{count($item)}"/>
+            }
+        </stats>
     
     
     return html:wrap(map { 
@@ -134,6 +147,14 @@ function report:start(
                 type: 'pie',
                 title: 'Created By Stats'
             }}];
+            
+            var modifiedByStats = [{{
+                values: [{string-join(data($modifiedByStats/modifiedBy/@count),",")}],
+                labels: [{string-join(for $item in $modifiedByStats/modifiedBy/@name return concat("'",$item,"'"),",")}],
+                type: 'pie',
+                title: 'Modified By Stats'
+            }}];
+            
 
             var chartLayout = {{
             height: 400,
@@ -149,6 +170,7 @@ function report:start(
             Plotly.newPlot('objects_chart', objectStats, chartLayout);
             Plotly.newPlot('deployment_status_chart', deploymentStats, chartLayout);
             Plotly.newPlot('createdBy_chart', createdByStats, userStatsLayout);
+            Plotly.newPlot('modifiedBy_chart', modifiedByStats, userStatsLayout);
         }});
       </script>
     },
@@ -203,6 +225,8 @@ function report:start(
                     <div id="deployment_status_chart" class="summaryColumn">
                     </div>
                     <div id="createdBy_chart" class="summaryColumn">
+                    </div>
+                    <div id="modifiedBy_chart" class="summaryColumn">
                     </div>
                 </div><!--END div #summary_container -->
                 <div class="tableWrapper">
