@@ -18,15 +18,39 @@ assets (Mappings, Mapping Tasks, Taskflows) stored as JSON. This plan adds:
 
 Primary test package for CDI functionality:
 
-- **Windows path**: `C:\Users\NCVJ9B\Downloads\iics\NATL_ClaimCenter_GW.zip`
-- **Linux path**: Upload via the web UI at `http://localhost:8984/iics/database`
-  or copy to the server and use `ant basex.create.db`
+- **Linux path**: `/home/jbrazda/Downloads/NATL_ClaimCenter_GW.zip`
+- Upload via the web UI at `http://localhost:8984/iics/database`
+  or run: `ant basex.create.db -Dbasex.source=/home/jbrazda/Downloads/NATL_ClaimCenter_GW.zip`
 
-Secondary test packages available on the Linux server:
+### Package Contents (NATL_ClaimCenter_GW.zip - verified 2026-03-30)
+
+| Category | Count | Notes |
+|----------|-------|-------|
+| Total entries | 547 | - |
+| XML documents | 364 | CAI assets (Processes, Guides, Connections, etc.) |
+| Nested ZIPs | 73 | CDI assets (see breakdown below) |
+| Top-level JSON | 1 | `exportMetadata.v2.json` only |
+
+Nested ZIP breakdown by type:
+
+| Extension | Count | JSON file inside | Asset type |
+|-----------|-------|-----------------|------------|
+| `.DTEMPLATE.zip` | 25 | `mappingTemplate.json` | CDI Mapping Template |
+| `.MTT.zip` | 23 | `mtTask.json` | CDI Mapping Task |
+| `.Connection.zip` | 17 | `connection.json` | CDI Connection |
+| `.BSERVICE.zip` | 4 | `businessService.json` | CDI Business Service |
+| `.FWCONFIG.zip` | 2 | `fwConfig.json` | CDI Format/Framework Config |
+| `.HSCHEMA.zip` | 1 | `hschema.json` | CDI Hierarchical Schema |
+| `.AgentGroup.zip` | 1 | `runtimeEnvironment.json` | Secure Agent Group |
+
+Folder structure (top-level projects under `Explore/`):
+`ClaimCenter_GW`, `PerceptiveContent`, `Connections`, `Esignature`, `DAS`, `Connectors`,
+`Logging`, `Tools`
+
+Secondary test packages on the Linux server:
 
 - `/home/jbrazda/Downloads/s3_test/CI-CD-Demo_2021-04-07-172924_a5f9150d.zip`
   Used for Phase 1 and Phase 2 verification (1 mapping, 1 task, 2 connections confirmed)
-- Previous uploads: `NATL_ClaimCenter_GW_iics_tag_build` database on the BaseX server
 
 ---
 
@@ -249,12 +273,21 @@ return (
 | Mapping Template | `.DTEMPLATE.zip` | `mappingTemplate.json` |
 | Mapping Task | `.MTT.zip` | `mtTask.json` |
 | Connection | `.Connection.zip` | `connection.json` |
-| Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` |
-| B2B Customer | `.B2BGW_CUSTOMER.zip` | (skip) |
+| Business Service | `.BSERVICE.zip` | `businessService.json` |
+| Format/Framework Config | `.FWCONFIG.zip` | `fwConfig.json` |
+| Hierarchical Schema | `.HSCHEMA.zip` | `hschema.json` |
 | AgentGroup | `.AgentGroup.zip` | `runtimeEnvironment.json` |
+| Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` |
+| B2B Customer | `.B2BGW_CUSTOMER.zip` | (skip - binary data) |
 
 No standalone CDI Taskflow nested ZIPs found in any surveyed package.
 CAI Taskflows remain as `.TASKFLOW.xml` in the top-level ZIP.
+
+> **Note for NATL_ClaimCenter_GW.zip**: The `.BSERVICE.zip`, `.FWCONFIG.zip`, and
+> `.HSCHEMA.zip` types are present but `cdi-metadata.xqm` does not yet expose them in
+> the UI. They are indexed by `cdi:index-nested-zip` (JSON stored as binary) but no
+> query functions or tables exist for them yet. Adding support is a candidate for
+> Phase 2b or Phase 6 (Unified Catalogue).
 
 ### Path patterns (implemented)
 
@@ -330,6 +363,48 @@ Binary (JSON) resources: 13
   - mtTask.json -> mct_SFDC_FF_Accounts (1 task)
   - connection.json -> FF_NA_Staging_Salesforce, Salesforce (2 connections)
 Dependencies resolved: m_SFDC_FF_Accounts -> [FF_NA_Staging_Salesforce, Salesforce]
+```
+
+### Expected results for NATL_ClaimCenter_GW.zip (pending upload test)
+
+```
+XML docs: 364
+Binary (JSON) resources: 73+ (one per nested ZIP entry, plus top-level exportMetadata.v2.json)
+CDI assets expected:
+  - Mappings: 25 (DTEMPLATE)
+  - Mapping Tasks: 23 (MTT)
+  - Connections: 17 (Connection)
+  - Business Services: 4 (BSERVICE) - indexed but not yet shown in UI
+  - Format Configs: 2 (FWCONFIG) - indexed but not yet shown in UI
+  - Hierarchical Schemas: 1 (HSCHEMA) - indexed but not yet shown in UI
+  - Agent Groups: 1 (AgentGroup) - indexed but not yet shown in UI
+```
+
+To run the extraction test directly on the Linux server:
+
+```bash
+# Create DB from XML (transaction 1)
+/opt/java/library/basex/bin/basex -q "
+  let \$zip := file:read-binary('/home/jbrazda/Downloads/NATL_ClaimCenter_GW.zip')
+  let \$all := archive:entries(\$zip)/string()
+  let \$xml := \$all[ends-with(lower-case(.), '.xml') and not(starts-with(., '__MACOSX/'))]
+  return db:create('NATL_ClaimCenter_GW', archive:extract-text(\$zip, \$xml), \$xml)"
+
+# Run CDI extraction (transaction 2)
+/opt/java/library/basex/bin/basex -u -q "
+  import module namespace cdi = 'iics/cdi-extract'
+    at '/opt/java/library/basex/webapp/iics/modules/cdi-extract.xqm';
+  cdi:extract-from-package('NATL_ClaimCenter_GW',
+    '/home/jbrazda/Downloads/NATL_ClaimCenter_GW.zip')"
+
+# Verify counts
+/opt/java/library/basex/bin/basex -q "
+  import module namespace cdi = 'iics/cdi-metadata'
+    at '/opt/java/library/basex/webapp/iics/modules/cdi-metadata.xqm';
+  let \$db := 'NATL_ClaimCenter_GW'
+  return ('Mappings: '    || count(cdi:getMappings(\$db)),
+          'Tasks: '       || count(cdi:getMappingTasks(\$db)),
+          'Connections: ' || count(cdi:getConnections(\$db)))"
 ```
 
 ---
