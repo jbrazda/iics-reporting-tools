@@ -14,6 +14,66 @@ assets (Mappings, Mapping Tasks, Taskflows) stored as JSON. This plan adds:
 
 ---
 
+## IICS Asset Type Reference
+
+Full asset type list from the
+[IICS Platform REST API v3 - Finding an Asset](https://docs.informatica.com/cloud-common-services/administrator/current-version/rest-api-reference/platform-rest-api-version-3-resources/objects/finding-an-asset.html).
+
+### Data Integration (CDI) Asset Types
+
+| API Type | Display Name | Nested ZIP Extension | JSON file | Support Status |
+|----------|-------------|---------------------|-----------|----------------|
+| `DTEMPLATE` | Mapping | `.DTEMPLATE.zip` | `mappingTemplate.json` | SUPPORTED |
+| `MTT` | Mapping Task | `.MTT.zip` | `mtTask.json` | SUPPORTED |
+| `DSS` | Synchronization Task | `.DSS.zip` | (not verified) | INDEXED only |
+| `DMASK` | Masking Task | `.DMASK.zip` | (not verified) | INDEXED only |
+| `DRS` | Replication Task | `.DRS.zip` | (not verified) | INDEXED only |
+| `DMAPPLET` | Mapplet (Data Integration) | `.DMAPPLET.zip` | (not verified) | INDEXED only |
+| `MAPPLET` | PowerCenter Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` | INDEXED only |
+| `BSERVICE` | Business Service | `.BSERVICE.zip` | `businessService.json` | INDEXED only |
+| `HSCHEMA` | Hierarchical Schema | `.HSCHEMA.zip` | `hschema.json` | INDEXED only |
+| `PCS` | PowerCenter Task | `.PCS.zip` | (not verified) | INDEXED only |
+| `FWCONFIG` | Fixed Width Configuration | `.FWCONFIG.zip` | `fwConfig.json` | INDEXED only |
+| `CUSTOMSOURCE` | Saved Query | `.CUSTOMSOURCE.zip` | (not verified) | INDEXED only |
+| `MI_TASK` | Mass Ingestion Task | `.MI_TASK.zip` | (not verified) | INDEXED only |
+| `WORKFLOW` | Linear Taskflow | `.WORKFLOW.zip` | (not verified) | INDEXED only |
+| `TASKFLOW` | Taskflow | `.TASKFLOW.zip` | (not verified) | INDEXED only |
+| `UDF` | User-Defined Function | `.UDF.zip` | (not verified) | INDEXED only |
+| `Connection` | CDI Connection | `.Connection.zip` | `connection.json` | SUPPORTED |
+| `AgentGroup` | Secure Agent Group | `.AgentGroup.zip` | `runtimeEnvironment.json` | INDEXED only |
+
+> "INDEXED only" means `cdi:index-nested-zip` stores the JSON as binary in the DB,
+> but no query functions or UI tables exist for those types yet.
+> "not verified" means the nested ZIP extension is an assumption based on the API type code;
+> no package with that type has been inspected yet.
+
+### Application Integration (CAI) Asset Types
+
+| API Type | Display Name | MIME Type | XML Extension | Support Status |
+|----------|-------------|-----------|---------------|----------------|
+| `PROCESS` | Process | `application/xml+process` | `.PROCESS.xml` | SUPPORTED |
+| `GUIDE` | Guide (Screenflow) | `application/xml+screenflow` | `.GUIDE.xml` | SUPPORTED |
+| `AI_CONNECTION` | Connection | `application/xml+connection` | `.AI_CONNECTION.xml` | SUPPORTED |
+| `AI_SERVICE_CONNECTOR` | Service Connector | `application/xml+businesssconnector` | `.AI_SERVICE_CONNECTOR.xml` | SUPPORTED |
+| `PROCESS_OBJECT` | Process Object | `application/xml+processobject` | `.PROCESS_OBJECT.xml` | SUPPORTED |
+| `TASKFLOW` | Task Flow | `application/xml+taskflow` | `.TASKFLOW.xml` | SUPPORTED |
+
+### B2B Gateway Asset Types
+
+| API Type | Display Name | Format | Support Status |
+|----------|-------------|--------|----------------|
+| `B2BGW_CUSTOMER` | B2B Customer | Nested ZIP | NOT SUPPORTED |
+| `B2BGW_SUPPLIER` | B2B Supplier | Nested ZIP | NOT SUPPORTED |
+| `B2BGW_MONITOR` | B2B Monitor | Unknown | NOT SUPPORTED |
+
+### Other Asset Types (MDM, Data Quality, Profiling)
+
+MDM SaaS, Data Quality, and Data Profiling types (`MDM_*`, `CLEANSE`, `DEDUPLICATE`,
+`DICTIONARY`, `EXCEPTION`, `LABELER`, `PARSE`, `RULE_SPECIFICATION`, `VERIFIER`,
+`PROFILE`) are out of scope for this plan.
+
+---
+
 ## Test Package
 
 Primary test package for CDI functionality:
@@ -78,15 +138,18 @@ by the upload handler. The background job reads from the filesystem ZIP, not the
 ### Bug 2 - Wrong nested ZIP JSON file names
 
 `cdi-metadata.xqm` looks for paths ending in `/mapping.json`, `/mappingtask.json`,
-`/taskflow.json`. Actual IICS CDI package structure uses different file names:
+`/taskflow.json`. Actual IICS CDI package structure uses different file names.
+See [IICS Asset Type Reference](#iics-asset-type-reference) for the full type list.
+Key types verified in surveyed packages:
 
-| Asset type | Nested ZIP extension | JSON file inside |
-|-----------|---------------------|-----------------|
-| Mapping Template | `.DTEMPLATE.zip` | `mappingTemplate.json` |
-| Mapping Task | `.MTT.zip` | `mtTask.json` |
-| Connection | `.Connection.zip` | `connection.json` |
-| Mapplet | `.MAPPLET.zip` | (complex binary format) |
-| B2B Customer | `.B2BGW_CUSTOMER.zip` | - |
+| API Type | Nested ZIP extension | JSON file inside |
+|---------|---------------------|-----------------|
+| `DTEMPLATE` | `.DTEMPLATE.zip` | `mappingTemplate.json` |
+| `MTT` | `.MTT.zip` | `mtTask.json` |
+| `Connection` | `.Connection.zip` | `connection.json` |
+| `BSERVICE` | `.BSERVICE.zip` | `businessService.json` |
+| `FWCONFIG` | `.FWCONFIG.zip` | `fwConfig.json` |
+| `HSCHEMA` | `.HSCHEMA.zip` | `hschema.json` |
 
 No standalone CDI Taskflow nested ZIPs were found in the surveyed packages.
 CAI Taskflows remain as `.TASKFLOW.xml` files in the top-level ZIP.
@@ -268,26 +331,27 @@ return (
 
 ### Actual CDI package structure (verified from live packages)
 
-| Asset type | Nested ZIP extension | JSON file inside |
-|-----------|---------------------|-----------------|
-| Mapping Template | `.DTEMPLATE.zip` | `mappingTemplate.json` |
-| Mapping Task | `.MTT.zip` | `mtTask.json` |
-| Connection | `.Connection.zip` | `connection.json` |
-| Business Service | `.BSERVICE.zip` | `businessService.json` |
-| Format/Framework Config | `.FWCONFIG.zip` | `fwConfig.json` |
-| Hierarchical Schema | `.HSCHEMA.zip` | `hschema.json` |
-| AgentGroup | `.AgentGroup.zip` | `runtimeEnvironment.json` |
-| Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` |
-| B2B Customer | `.B2BGW_CUSTOMER.zip` | (skip - binary data) |
+Verified from CI-CD-Demo and NATL_ClaimCenter_GW packages. See the
+[IICS Asset Type Reference](#iics-asset-type-reference) table above for the complete
+official API type list.
+
+| Asset type | API Type | Nested ZIP extension | JSON file inside | In NATL package |
+|-----------|---------|---------------------|-----------------|-----------------|
+| Mapping Template | `DTEMPLATE` | `.DTEMPLATE.zip` | `mappingTemplate.json` | 25 |
+| Mapping Task | `MTT` | `.MTT.zip` | `mtTask.json` | 23 |
+| Connection | `Connection` | `.Connection.zip` | `connection.json` | 17 |
+| Business Service | `BSERVICE` | `.BSERVICE.zip` | `businessService.json` | 4 |
+| Fixed Width Config | `FWCONFIG` | `.FWCONFIG.zip` | `fwConfig.json` | 2 |
+| Hierarchical Schema | `HSCHEMA` | `.HSCHEMA.zip` | `hschema.json` | 1 |
+| Secure Agent Group | `AgentGroup` | `.AgentGroup.zip` | `runtimeEnvironment.json` | 1 |
+| PC Mapplet | `MAPPLET` | `.MAPPLET.zip` | `mappingTemplate.json` | 0 |
 
 No standalone CDI Taskflow nested ZIPs found in any surveyed package.
 CAI Taskflows remain as `.TASKFLOW.xml` in the top-level ZIP.
 
-> **Note for NATL_ClaimCenter_GW.zip**: The `.BSERVICE.zip`, `.FWCONFIG.zip`, and
-> `.HSCHEMA.zip` types are present but `cdi-metadata.xqm` does not yet expose them in
-> the UI. They are indexed by `cdi:index-nested-zip` (JSON stored as binary) but no
-> query functions or tables exist for them yet. Adding support is a candidate for
-> Phase 2b or Phase 6 (Unified Catalogue).
+> `BSERVICE`, `FWCONFIG`, and `HSCHEMA` assets are indexed by `cdi:index-nested-zip`
+> (JSON stored as binary) but have no query functions or UI tables yet.
+> Adding UI support is a candidate for Phase 2b or Phase 6 (Unified Catalogue).
 
 ### Path patterns (implemented)
 
