@@ -10,7 +10,7 @@
  :   Mapping Task      - .MTT.zip       -> mtTask.json
  :   Connection        - .Connection.zip -> connection.json
  :
- : JSON is stored as raw binary (via db:store) so it can be reliably retrieved and
+ : JSON is stored as raw binary (via db:put-binary) so it can be reliably retrieved and
  : parsed with json:parse(). Use cdi:hasCDIAssets($dbname) to check before querying.
  :
  : Cross-reference format: refObjectId / mappingId / sourceConnectionId values use
@@ -20,9 +20,6 @@
  : @author Jaroslav Brazda, 2024, MIT License
  :)
 module namespace cdi = 'iics/cdi-metadata';
-
-declare namespace db      = "http://basex.org/modules/db";
-declare namespace convert = "http://basex.org/modules/convert";
 
 (:~ Human-readable labels for CDI asset types. :)
 declare variable $cdi:TYPES := map {
@@ -34,16 +31,16 @@ declare variable $cdi:TYPES := map {
 (:~
  : Retrieves a binary JSON resource from the database and parses it into an XQuery map.
  :
- : JSON files are stored as binary (xs:base64Binary) via db:store() during extraction.
+ : JSON files are stored as binary (xs:base64Binary) via db:put-binary() during extraction.
  :
  : @param  $dbname  database name
  : @param  $path    path of the binary resource within the database
  : @return first element of the parsed JSON (unwraps single-element arrays)
  :)
 declare function cdi:parse-json($dbname as xs:string, $path as xs:string) as map(*)? {
-  let $bin    := db:retrieve($dbname, $path)
+  let $bin    := db:get-binary($dbname, $path)
   let $text   := convert:binary-to-string($bin, 'UTF-8')
-  let $parsed := json:parse($text, map { 'format': 'xquery' })
+  let $parsed := json:parse($text, map { 'format': 'w3' })
   return
     if ($parsed instance of array(*)) then $parsed?1
     else if ($parsed instance of map(*)) then $parsed

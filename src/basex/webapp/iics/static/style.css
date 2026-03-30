@@ -364,3 +364,33 @@ ul.tree, ul.tree ul {
 }
 
 
+
+/* ============================================================
+   vis.js dependency graph styles
+   ============================================================ */
+
+.vis-graph-container {
+    width: 100%;
+    height: 550px;
+    border: 1px solid #c8c8c8;
+    border-radius: 3px;
+    background: #fafafa;
+    position: relative;
+}
+
+.graph-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0 10px 0;
+}
+
+.vis-group-root         { background: #2a6496; color: #fff; border: 2px solid #1e4d79; }
+.vis-group-process      { background: #d9edf7; border: 1px solid #bce8f1; }
+.vis-group-guide        { background: #dff0d8; border: 1px solid #d6e9c6; }
+.vis-group-connection   { background: #fcf8e3; border: 1px solid #faebcc; }
+.vis-group-connector    { background: #f2dede; border: 1px solid #ebccd1; }
+.vis-group-processObject{ background: #e8d5f5; border: 1px solid #c9a3e8; }
+.vis-group-taskflow     { background: #d5e8d4; border: 1px solid #82b366; }
+.vis-group-cdi-mapping  { background: #dae8fc; border: 1px solid #6c8ebf; }
+.vis-group-cdi-task     { background: #fff2cc; border: 1px solid #d6b656; }

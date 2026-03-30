@@ -124,3 +124,112 @@ $(function () {
     }
 
 });
+
+// ============================================================
+// vis.js dependency / impact graph rendering
+// ============================================================
+
+IICS = window.IICS || {};
+
+/** Group-to-color map matching CSS class colours above. */
+IICS.graphColors = {
+    root          : { background: '#2a6496', border: '#1e4d79', font: { color: '#fff' } },
+    process       : { background: '#d9edf7', border: '#bce8f1' },
+    guide         : { background: '#dff0d8', border: '#d6e9c6' },
+    connection    : { background: '#fcf8e3', border: '#faebcc' },
+    connector     : { background: '#f2dede', border: '#ebccd1' },
+    processObject : { background: '#e8d5f5', border: '#c9a3e8' },
+    taskflow      : { background: '#d5e8d4', border: '#82b366' },
+    'cdi-mapping' : { background: '#dae8fc', border: '#6c8ebf' },
+    'cdi-task'    : { background: '#fff2cc', border: '#d6b656' }
+};
+
+/** Stores vis.Network instances keyed by container element id. */
+IICS._graphs = {};
+
+/**
+ * Fetches graph data from the JSON API and renders a vis.js Network.
+ *
+ * @param {string}  database   database name
+ * @param {string}  guid       design GUID
+ * @param {Element} container  DOM element for the graph canvas
+ * @param {Element} statusEl   DOM element for status messages
+ * @param {string}  type       'deps' or 'impact'
+ */
+IICS._renderGraph = function (database, guid, container, statusEl, type) {
+    if (!container || container._visInitialized) { return; }
+
+    var endpoint = type === 'impact'
+        ? '/iics/api/design/impact'
+        : '/iics/api/design/dependencies';
+
+    statusEl.textContent = 'Loading graph…';
+
+    fetch(endpoint + '?database=' + encodeURIComponent(database) +
+                      '&guid='     + encodeURIComponent(guid))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) {
+                statusEl.textContent = 'Error: ' + data.error;
+                return;
+            }
+            statusEl.textContent = data.cached
+                ? '(' + data.nodes.length + ' nodes, cached)'
+                : '(' + data.nodes.length + ' nodes, computed live)';
+
+            // Attach color options based on group
+            var nodes = (data.nodes || []).map(function (n) {
+                var color = IICS.graphColors[n.group] || {};
+                return Object.assign({}, n, {
+                    color : color,
+                    font  : color.font || {}
+                });
+            });
+
+            var visNodes = new vis.DataSet(nodes);
+            var visEdges = new vis.DataSet(data.edges || []);
+            var network  = new vis.Network(container, { nodes: visNodes, edges: visEdges }, {
+                layout: {
+                    hierarchical: {
+                        enabled   : true,
+                        direction : 'LR',
+                        sortMethod: 'directed'
+                    }
+                },
+                edges : { arrows: 'to', smooth: { type: 'cubicBezier' } },
+                physics: { enabled: false }
+            });
+
+            IICS._graphs[container.id] = { network: network, hierarchical: true };
+            container._visInitialized = true;
+        })
+        .catch(function (err) {
+            statusEl.textContent = 'Failed to load graph: ' + err.message;
+        });
+};
+
+/** Initializes the dependency graph for a design detail page. */
+IICS.initDepGraph = function (database, guid, container, statusEl) {
+    IICS._renderGraph(database, guid, container, statusEl, 'deps');
+};
+
+/** Initializes the impact graph for a design detail page. */
+IICS.initImpactGraph = function (database, guid, container, statusEl) {
+    IICS._renderGraph(database, guid, container, statusEl, 'impact');
+};
+
+/**
+ * Toggles a vis.js graph between hierarchical (LR) and force-directed layout.
+ *
+ * @param {string} containerId  id of the graph container element
+ */
+IICS.toggleGraphLayout = function (containerId) {
+    var entry = IICS._graphs[containerId];
+    if (!entry) { return; }
+    var newHierarchical = !entry.hierarchical;
+    entry.hierarchical  = newHierarchical;
+    entry.network.setOptions({
+        layout : { hierarchical: { enabled: newHierarchical } },
+        physics: { enabled: !newHierarchical }
+    });
+};

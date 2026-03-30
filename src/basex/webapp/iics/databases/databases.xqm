@@ -19,7 +19,7 @@ declare namespace db      = "http://basex.org/modules/db";
 declare namespace rest    = "http://exquery.org/ns/restxq";
 declare namespace archive = "http://basex.org/modules/archive";
 declare namespace file    = "http://expath.org/ns/file";
-declare namespace jobs    = "http://basex.org/modules/jobs";
+declare namespace job     = "http://basex.org/modules/job";
 
 (:~
  : Shows the database list page with an upload form.
@@ -86,7 +86,7 @@ function iics:start(
                     <tbody>       
                         {
                         for $db in db:list-details()
-                            let $containsIPDData := exists(db:open($db/text())//rep:Item)
+                            let $containsIPDData := exists(db:get($db/text())//rep:Item)
                             let $size := data($db/@size)
                             where $containsIPDData
                         return
@@ -167,7 +167,9 @@ function iics:upload(
       file:write-binary($tmpfile, $zip),
       iics:create-db-from-zip($name, $zip),
       update:output(
-        let $_ := jobs:eval(
+        let $_ := job:eval(
+          "declare variable $db external;" ||
+          "declare variable $zip external;" ||
           "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
           " cdi:extract-from-package($db, $zip)",
           map { 'db': $name, 'zip': $tmpfile },
@@ -239,7 +241,9 @@ function iics:upload-overwrite(
       db:drop($name),
       iics:create-db-from-zip($name, $zip),
       update:output(
-        let $_ := jobs:eval(
+        let $_ := job:eval(
+          "declare variable $db external;" ||
+          "declare variable $zip external;" ||
           "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
           " cdi:extract-from-package($db, $zip)",
           map { 'db': $name, 'zip': $tmpfile },

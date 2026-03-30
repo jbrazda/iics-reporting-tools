@@ -29,7 +29,7 @@ function report:start(
    $database as xs:string
 ) as element(html) {
     let $error := ()
-    let $db := db:open($database)
+    let $db := if ($database != '' and db:exists($database)) then db:get($database) else ()
 
     let $connectors     := $db//rep:Item[exists(//svc:businessConnector)]
     let $connections    := $db//rep:Item[exists(//con:connection)]
