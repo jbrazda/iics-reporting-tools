@@ -110,7 +110,7 @@ function report:start(
       'inlineScripts' : 
       <script type="text/javascript" charset="utf-8">
           $(document).ready(function() {{
-            $("table.display" ).DataTable({{
+            $("table.display").not('#cdi-tabs table').DataTable({{
                 jQueryUI : true,
                 scrollX : true,
                 scrollY : false,

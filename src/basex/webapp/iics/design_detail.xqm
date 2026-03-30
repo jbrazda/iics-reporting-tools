@@ -53,7 +53,7 @@ function iics:render(
         $(document).ready(function() {{
             $("#design-tabs").tabs();
             $("#tabs").tabs();
-            $("table.display" ).DataTable({{
+            $("table.display").not('#cdi-tabs table').DataTable({{
                 jQueryUI : true,
                 scrollX : true,
                 scrollY : false,
