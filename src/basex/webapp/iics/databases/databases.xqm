@@ -2,7 +2,6 @@ module namespace iics = 'iics/database';
 
 import module namespace html   = 'iics/html' at '../modules/html.xqm';
 import module namespace mhtml  = 'iics/ipd-metadata-html' at '../modules/ipd-metadata-html.xqm';
-import module namespace cdi    = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';
 
 (:ICAI namespaces:)
 declare namespace sfd = "http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd";
@@ -161,19 +160,19 @@ function iics:upload(
       update:output(web:redirect('/iics/database/upload/confirm', map { 'name': $name, 'tmpfile': $tmpfile }))
     )
   else (
-    (: Write ZIP to temp file, create database from XML, then schedule CDI extraction :)
+    (: Write ZIP to temp file, create database from XML, then schedule CDI extraction.
+       Use file:read-text() to load the standalone job as inline query - file-based
+       job:eval silently fails in BaseX 12.2 HTTP server; inline query persists correctly. :)
     let $tmpfile := file:temp-dir() || '_iics_upload_' || $name || '.zip'
+    let $jobFile := file:base-dir() || '../modules/cdi-extract-job.xq'
     return (
       file:write-binary($tmpfile, $zip),
       iics:create-db-from-zip($name, $zip),
       update:output(
         let $_ := job:eval(
-          "declare variable $db external;" ||
-          "declare variable $zip external;" ||
-          "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
-          " cdi:extract-from-package($db, $zip)",
+          file:read-text($jobFile),
           map { 'db': $name, 'zip': $tmpfile },
-          map { 'base-uri': file:base-dir() }
+          map { 'base-uri': file:base-dir() || '../modules/' }
         )
         return web:redirect('/iics/report', map { 'database': $name })
       )
@@ -236,18 +235,16 @@ function iics:upload-overwrite(
   if (string-length($name) = 0 or empty($tmpfile) or not(file:exists($tmpfile))) then
     update:output(iics:upload-error('Upload session has expired or the temporary file is missing. Please re-upload the package.'))
   else
-    let $zip := file:read-binary($tmpfile)
+    let $zip     := file:read-binary($tmpfile)
+    let $jobFile := file:base-dir() || '../modules/cdi-extract-job.xq'
     return (
       db:drop($name),
       iics:create-db-from-zip($name, $zip),
       update:output(
         let $_ := job:eval(
-          "declare variable $db external;" ||
-          "declare variable $zip external;" ||
-          "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
-          " cdi:extract-from-package($db, $zip)",
+          file:read-text($jobFile),
           map { 'db': $name, 'zip': $tmpfile },
-          map { 'base-uri': file:base-dir() }
+          map { 'base-uri': file:base-dir() || '../modules/' }
         )
         return web:redirect('/iics/report', map { 'database': $name })
       )

@@ -291,6 +291,24 @@
         <echo level="info">IICS Repoting available on ${basex.http.base_url}/iics</echo>
     </target>
 
+    <!-- basex12.data.home defaults to /tmp/basex12_home to keep basex12 data separate from basex9.
+         Override in ~/.iics.reporting.properties if a different location is preferred. -->
+    <property name="basex12.data.home" value="/tmp/basex12_home" />
+
+    <target name="basexhttp12.start" depends="-env.info" description="Run BaseX 12 HTTP Server with separate data home (HOME=${basex12.data.home})">
+        <exec executable="${basex.home}/bin/basexhttp${exec.ext}" spawn="true" dir="${basex.home}">
+            <env key="JAVA_HOME" value="${basex.java_home}" />
+            <env key="PATH" value="${PATH.basex}" />
+            <env key="HOME" value="${basex12.data.home}" />
+        </exec>
+        <waitfor checkevery="500" checkeveryunit="millisecond" maxwaitunit="minute" maxwait="2" timeoutproperty="basex12.http.timeout">
+            <http url="${basex.http.base_url}/" />
+        </waitfor>
+        <fail if="basex12.http.timeout" message="Timeout waiting for BaseX 12 HTTP Server to start on ${basex.http.base_url}" />
+        <echo level="info">BaseX 12 HTTP started on ${basex.http.base_url}</echo>
+        <echo level="info">IICS Reporting available on ${basex.http.base_url}/iics</echo>
+        <echo level="info">Data home: ${basex12.data.home}</echo>
+    </target>
 
     <target name="check.basexhttp.up" depends="-env.info">
         <condition property="basex.http.up" value="true" else="false">
