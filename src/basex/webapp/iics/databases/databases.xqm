@@ -2,6 +2,7 @@ module namespace iics = 'iics/database';
 
 import module namespace html   = 'iics/html' at '../modules/html.xqm';
 import module namespace mhtml  = 'iics/ipd-metadata-html' at '../modules/ipd-metadata-html.xqm';
+import module namespace cdi    = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';
 
 (:ICAI namespaces:)
 declare namespace sfd = "http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd";
@@ -18,6 +19,7 @@ declare namespace db      = "http://basex.org/modules/db";
 declare namespace rest    = "http://exquery.org/ns/restxq";
 declare namespace archive = "http://basex.org/modules/archive";
 declare namespace file    = "http://expath.org/ns/file";
+declare namespace jobs    = "http://basex.org/modules/jobs";
 
 (:~
  : Shows the database list page with an upload form.
@@ -159,9 +161,17 @@ function iics:upload(
       update:output(web:redirect('/iics/database/upload/confirm', map { 'name': $name, 'tmpfile': $tmpfile }))
     )
   else (
-    (: Create database immediately :)
+    (: Create database immediately, then schedule CDI extraction background job :)
     iics:create-db-from-zip($name, $zip),
-    update:output(web:redirect('/iics/report', map { 'database': $name }))
+    update:output(
+      let $_ := jobs:eval(
+        "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
+        " cdi:process-nested-zips($db)",
+        map { 'db': $name },
+        map { 'base-uri': file:base-dir() }
+      )
+      return web:redirect('/iics/report', map { 'database': $name })
+    )
   )
 };
 
@@ -225,23 +235,45 @@ function iics:upload-overwrite(
       db:drop($name),
       iics:create-db-from-zip($name, $zip),
       file:delete($tmpfile),
-      update:output(web:redirect('/iics/report', map { 'database': $name }))
+      update:output(
+        let $_ := jobs:eval(
+          "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
+          " cdi:process-nested-zips($db)",
+          map { 'db': $name },
+          map { 'base-uri': file:base-dir() }
+        )
+        return web:redirect('/iics/report', map { 'database': $name })
+      )
     )
 };
 
 (:~
- : Creates a BaseX database from the XML entries of a ZIP archive.
+ : Creates a BaseX database from the XML entries of a ZIP archive, and stores any nested
+ : ZIP files as binary documents so the background extraction job can process them.
+ :
+ : After calling this, schedule cdi:process-nested-zips() via jobs:eval() to expand
+ : the stored binaries and index CDI JSON assets.
+ :
  : @param  $dbname  target database name
- : @param  $zip     ZIP archive as base64Binary
+ : @param  $zip     top-level ZIP archive as base64Binary
  :)
 declare %private %updating function iics:create-db-from-zip(
   $dbname as xs:string,
   $zip    as xs:base64Binary
 ) {
-  let $allEntries := archive:entries($zip)/string()
-  let $xmlEntries := $allEntries[ends-with(lower-case(.), '.xml')]
-  let $xmlDocs    := archive:extract-text($zip, $xmlEntries)
-  return db:create($dbname, $xmlDocs, $xmlEntries)
+  let $allEntries  := archive:entries($zip)/string()
+  let $xmlEntries  := $allEntries[ends-with(lower-case(.), '.xml')
+                                  and not(starts-with(., '__MACOSX/'))]
+  let $zipEntries  := $allEntries[ends-with(lower-case(.), '.zip')
+                                  and not(starts-with(., '__MACOSX/'))]
+  let $xmlDocs     := archive:extract-text($zip, $xmlEntries)
+  return (
+    (: Create database from top-level XML documents :)
+    db:create($dbname, $xmlDocs, $xmlEntries),
+    (: Store nested ZIPs as binary — background job will expand them :)
+    for $zipEntry in $zipEntries
+      return db:put-binary($dbname, archive:extract-binary($zip, ($zipEntry)), $zipEntry)
+  )
 };
 
 (:~
