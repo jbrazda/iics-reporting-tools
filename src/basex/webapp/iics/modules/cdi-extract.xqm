@@ -1,17 +1,28 @@
 (:~
  : CDI asset extraction module.
  :
- : Processes nested ZIP files found inside an IICS export package. CDI (Cloud Data
- : Integration) assets — Mappings, Mapping Tasks, Taskflows — are exported as nested ZIP
- : archives containing JSON (and occasionally XML) metadata files.
+ : Processes an uploaded IICS export package (ZIP file on the filesystem) to index
+ : CDI (Cloud Data Integration) assets into an existing BaseX database.
  :
- : After the top-level package ZIP is loaded into a BaseX database, call
- : cdi:process-nested-zips() to extract all nested ZIPs and index their contents at
- : paths such as:
+ : CDI assets are stored as nested ZIP archives within the top-level package ZIP.
+ : Known nested ZIP types and the JSON files they contain:
  :
- :   Explore/CDI/MP_SomeMapping/mapping.json
- :   Explore/CDI/MT_SomeTask/mappingtask.json
- :   Explore/CDI/TF_SomeFlow/taskflow.json
+ :   .DTEMPLATE.zip  -> mappingTemplate.json  (CDI Mapping Template)
+ :   .MTT.zip        -> mtTask.json            (CDI Mapping Task)
+ :   .Connection.zip -> connection.json        (CDI Connection)
+ :   .MAPPLET.zip    -> mappingTemplate.json   (CDI Mapplet)
+ :
+ : The top-level ZIP also contains useful JSON metadata:
+ :
+ :   exportMetadata.v2.json  - maps objectGuid (federatedId) to name and type
+ :   *.Folder.json           - folder structure metadata
+ :
+ : JSON files are stored as binary resources (via db:store) so that json:parse()
+ : can reliably retrieve and parse them later.
+ :
+ : This module is designed to be invoked as a BaseX background job via jobs:eval()
+ : AFTER the database has been created by iics:create-db-from-zip(). The db:create
+ : and db:store operations cannot share the same updating transaction.
  :
  : @author Jaroslav Brazda, 2024, MIT License
  :)
@@ -23,14 +34,19 @@ declare namespace file    = "http://expath.org/ns/file";
 declare namespace convert = "http://basex.org/modules/convert";
 
 (:~
- : Extracts text (JSON/XML) entries from a single nested ZIP archive and indexes them into
- : the database at paths derived from the ZIP path.
+ : Extracts JSON and XML entries from a single nested ZIP archive and indexes them
+ : into the database at paths derived from the ZIP entry path.
  :
- : Example: a nested ZIP stored at "Explore/CDI/MP_SomeMapping.zip" produces documents at
- :          "Explore/CDI/MP_SomeMapping/{entry-name}"
+ : Binary files (e.g. .bin) and non-text files are skipped. JSON is stored as binary
+ : (via db:store) to preserve the raw text for json:parse(). XML is stored as a
+ : parsed document node (via db:add).
  :
- : @param  $dbname   target database name
- : @param  $zipPath  path of the nested ZIP within the database (used to derive base path)
+ : Example: nested ZIP at "Explore/DI/m_Foo.DTEMPLATE.zip" produces:
+ :          "Explore/DI/m_Foo.DTEMPLATE/mappingTemplate.json"
+ :          "Explore/DI/m_Foo.DTEMPLATE/fileRecord.json"
+ :
+ : @param  $dbname   target database name (must already exist)
+ : @param  $zipPath  path of the nested ZIP entry within the package (for deriving base path)
  : @param  $zip      ZIP archive content as base64Binary
  :)
 declare %updating function cdi:index-nested-zip(
@@ -56,19 +72,44 @@ declare %updating function cdi:index-nested-zip(
 };
 
 (:~
- : Scans a database for binary ZIP documents previously stored by the upload process,
- : calls cdi:index-nested-zip for each one, then removes the raw binary.
+ : Extracts and indexes all CDI content from an IICS export package ZIP file.
  :
- : This function is designed to be invoked as a BaseX background job via jobs:eval().
+ : Processes:
+ :  - Top-level JSON files (exportMetadata.v2.json, *.Folder.json) stored as binary
+ :  - Nested ZIP files (.DTEMPLATE.zip, .MTT.zip, .Connection.zip, etc.) expanded
+ :    via cdi:index-nested-zip()
  :
- : @param  $dbname  target database name
+ : Deletes the temp ZIP file when done.
+ :
+ : This function runs as a BaseX background job after the database has been created
+ : by iics:create-db-from-zip() in a prior transaction.
+ :
+ : @param  $dbname   target database name (must already exist)
+ : @param  $zipPath  filesystem path to the package ZIP file (temp file from upload)
  :)
-declare %updating function cdi:process-nested-zips($dbname as xs:string) {
-  for $path in db:list-details($dbname)[@raw = 'true']
-                [ends-with(lower-case(text()), '.zip')]/text()
-    let $bin := db:retrieve($dbname, $path)
-    return (
-      cdi:index-nested-zip($dbname, $path, $bin),
-      db:delete($dbname, $path)
-    )
+declare %updating function cdi:extract-from-package(
+  $dbname  as xs:string,
+  $zipPath as xs:string
+) {
+  let $zip      := file:read-binary($zipPath)
+  let $all      := archive:entries($zip)/string()
+  let $topJson  := $all[ends-with(lower-case(.), '.json')
+                        and not(starts-with(., '__MACOSX/'))]
+  let $nested   := $all[ends-with(lower-case(.), '.zip')
+                        and not(starts-with(., '__MACOSX/'))]
+  return (
+    (: Index top-level JSON metadata files :)
+    for $j in $topJson
+      let $content := archive:extract-text($zip, ($j))
+      return db:store($dbname, $j, convert:string-to-base64($content, 'UTF-8'))
+    ,
+    (: Extract and index each nested ZIP :)
+    for $z in $nested
+      let $bin := archive:extract-binary($zip, ($z))
+      return cdi:index-nested-zip($dbname, $z, $bin)
+    ,
+    (: Remove the temp file :)
+    file:delete($zipPath)
+  )
 };
+
