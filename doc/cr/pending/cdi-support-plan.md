@@ -14,39 +14,144 @@ assets (Mappings, Mapping Tasks, Taskflows) stored as JSON. This plan adds:
 
 ---
 
+## Root Cause Analysis - CDI Assets Not Appearing (2024-03-30)
+
+Direct inspection of the running BaseX server and available IICS packages on this host
+revealed three separate bugs:
+
+### Bug 1 - `db:create` + `db:store` transaction conflict
+
+`iics:create-db-from-zip` issues `db:create($dbname, ...)` and then
+`db:store($dbname, $path, $binary)` in the **same updating transaction**.
+In BaseX XQuery Update, all pending updates are applied at the end of the transaction.
+`db:store` internally calls `db:open` during evaluation - but the database does not
+exist yet (it is only in the pending update list). This causes a silent failure:
+
+```
+[db:open] Database '...' was not found.
+```
+
+**Fix**: Remove nested ZIP `db:store` calls from `iics:create-db-from-zip`.
+Write nested ZIP content to the filesystem temp file that is already created
+by the upload handler. The background job reads from the filesystem ZIP, not the DB.
+
+### Bug 2 - Wrong nested ZIP JSON file names
+
+`cdi-metadata.xqm` looks for paths ending in `/mapping.json`, `/mappingtask.json`,
+`/taskflow.json`. Actual IICS CDI package structure uses different file names:
+
+| Asset type | Nested ZIP extension | JSON file inside |
+|-----------|---------------------|-----------------|
+| Mapping Template | `.DTEMPLATE.zip` | `mappingTemplate.json` |
+| Mapping Task | `.MTT.zip` | `mtTask.json` |
+| Connection | `.Connection.zip` | `connection.json` |
+| Mapplet | `.MAPPLET.zip` | (complex binary format) |
+| B2B Customer | `.B2BGW_CUSTOMER.zip` | - |
+
+No standalone CDI Taskflow nested ZIPs were found in the surveyed packages.
+CAI Taskflows remain as `.TASKFLOW.xml` files in the top-level ZIP.
+
+**Fix**: Update all path filters and JSON field names.
+
+### Bug 3 - Top-level JSON files not indexed
+
+Packages contain useful JSON at the top level that is currently ignored:
+- `exportMetadata.v2.json` - maps `objectGuid` (federatedId) to `objectName` and `objectType`
+- `*.Folder.json` - folder metadata
+
+**Fix**: Store top-level JSON files via the background job (after DB exists).
+
+### Actual CDI JSON Structures (verified from package inspection)
+
+**`mappingTemplate.json`** (inside `.DTEMPLATE.zip`):
+
+```json
+{
+  "@type": "mappingTemplate",
+  "id": "@1",
+  "name": "m_SFDC_FF_Accounts",
+  "references": [
+    { "@type": "reference", "refObjectId": "@5l6TgukGvc1h0NhBtswVGw", "refType": "connection" }
+  ]
+}
+```
+
+**`mtTask.json`** (inside `.MTT.zip`):
+
+```json
+{
+  "@type": "mtTask",
+  "id": "@1",
+  "name": "mct_SFDC_FF_Accounts",
+  "mappingId": "@536izJoEyCkfW49hApXpMN",
+  "parameters": [
+    { "type": "EXTENDED_SOURCE", "sourceConnectionId": "@hz1mAolBHYcb5lvDNIpaQa" },
+    { "type": "TARGET", "targetConnectionId": "@5l6TgukGvc1h0NhBtswVGw" }
+  ]
+}
+```
+
+**`connection.json`** (inside `.Connection.zip`):
+
+```json
+{
+  "@type": "connection",
+  "id": "@1",
+  "name": "Salesforce",
+  "federatedId": "hz1mAolBHYcb5lvDNIpaQa"
+}
+```
+
+**Cross-reference format**: `refObjectId` / `mappingId` / `sourceConnectionId` values are
+`"@" + federatedId`. Strip the leading `@` to resolve to the connection's `federatedId`.
+
+**`exportMetadata.v2.json`** (top-level):
+
+```json
+{
+  "exportedObjects": [
+    { "objectGuid": "5l6TgukGvc1h0NhBtswVGw", "objectName": "Salesforce", "objectType": "Connection" }
+  ]
+}
+```
+
+---
+
 ## Current State Summary
 
 | Area | Current | Gap |
 |------|---------|-----|
 | Upload | Extracts `.xml` files from top-level ZIP only | Nested ZIPs, JSON files ignored |
-| Metadata analysis | `ipd-metadata.xqm` — full CAI XML support | No CDI JSON support |
-| Dependency traversal | Recursive on every page load — expensive | No caching; blocks HTTP response |
+| Metadata analysis | `ipd-metadata.xqm` - full CAI XML support | No CDI JSON support |
+| Dependency traversal | Recursive on every page load - expensive | No caching; blocks HTTP response |
 | API | All endpoints return HTML only | No JSON API for graph UIs or external consumers |
 | Visualization | DataTables + jQuery UI tabs | No graph/network visualization |
 
 ---
 
-## Architecture Overview
+## Architecture Overview (revised)
 
 ```
 Upload ZIP
-   │
-   ├── Phase 1: iics:create-db-from-zip (extended)
-   │     ├── Extract .xml → text documents → db:create()
-   │     ├── Extract nested .zip → binary → db:put-binary()
-   │     └── Schedule background job → jobs:eval()
-   │
-   └── Background Job (jobs:eval)
-         ├── Scan DB for binary .zip entries
-         ├── For each: archive:entries() → extract JSON/XML
-         ├── db:add() JSON documents at paths like Explore/CDI/Mapping1/mapping.json
-         └── Trigger cache pre-computation job
-              └── For every rep:Item + CDI asset: compute deps → store in _cache/deps/{guid}.json
+   |
+   +-- iics:create-db-from-zip (Transaction 1 - sync)
+   |     +-- Extract .xml -> parse-xml() -> db:create()
+   |     +-- Write original ZIP to temp file (already done by iics:upload)
+   |     +-- Schedule background job -> jobs:eval(zipPath)
+   |
+   +-- Background Job: cdi:extract-from-package($dbname, $zipPath) (Transaction 2 - async)
+         +-- Store top-level JSON via db:store()
+         |    (exportMetadata.v2.json, *.Folder.json)
+         +-- For each nested .zip entry:
+         |    +-- archive:extract-binary() -> cdi:index-nested-zip()
+         |    +-- JSON files: db:store() as binary (for json:parse later)
+         +-- Delete temp ZIP file
+         +-- (Future) Trigger cache pre-computation job
 ```
 
 ---
 
-## Phase 1 — Nested ZIP Extraction Background Job
+## Phase 1 — Nested ZIP Extraction Background Job (revised)
 
 ### Files to change
 - `databases/databases.xqm` — trigger background job after DB creation
@@ -116,88 +221,69 @@ Explore/
 
 ---
 
-## Phase 2 — CDI Metadata Module
+## Phase 2 (revised) — CDI Metadata Module
 
-### Files
-- `modules/cdi-metadata.xqm` (NEW) — CDI dependency analysis (mirrors `ipd-metadata.xqm`)
-- `modules/cdi-metadata-html.xqm` (NEW) — CDI HTML rendering (mirrors `ipd-metadata-html.xqm`)
+### Files to change
 
-### CDI JSON Structures (to parse from extracted files)
+- `modules/cdi-metadata.xqm` - fix path patterns and JSON field accessors
+- `modules/cdi-metadata-html.xqm` - update table columns and detail view field names
 
-**Mapping** (`mapping.json`):
-```json
-{
-  "id": "abc123", "name": "MP_SFtoSAP",
-  "sources": [{"connectionId": "...", "connectionName": "Salesforce_Prod", "object": "Account"}],
-  "targets": [{"connectionId": "...", "connectionName": "SAP_Prod", "object": "CUSTOMER"}],
-  "lookups": [{"connectionId": "...", "connectionName": "Oracle_Ref"}]
-}
-```
-
-**Mapping Task** (`mappingtask.json`):
-```json
-{
-  "id": "...", "name": "MT_Daily",
-  "mappingId": "abc123", "mappingName": "MP_SFtoSAP",
-  "connections": [{"type": "SOURCE", "connectionId": "...", "connectionName": "..."}]
-}
-```
-
-**Taskflow** (`taskflow.json`):
-```json
-{
-  "id": "...", "name": "TF_DailySync",
-  "steps": [
-    {"type": "TASK",      "taskId": "...", "taskName": "MT_Daily"},
-    {"type": "CONDITION", "expression": "..."}
-  ]
-}
-```
-
-### Key XQuery functions to implement in `cdi-metadata.xqm`
+### Corrected path patterns
 
 ```xquery
-(:~ Returns all CDI Mappings in the database :)
-declare function cdi:getMappings($db as xs:string) as map(*)*
+(: Mappings - inside .DTEMPLATE.zip :)
+cdi:mapping-paths($db) :=
+  db:list-details($db)[@raw='true']
+    [ends-with(lower-case(text()), '/mappingtemplate.json')]/text()
 
-(:~ Returns all Mapping Tasks :)
-declare function cdi:getMappingTasks($db as xs:string) as map(*)*
+(: Tasks - inside .MTT.zip :)
+cdi:task-paths($db) :=
+  db:list-details($db)[@raw='true']
+    [ends-with(lower-case(text()), '/mttask.json')]/text()
 
-(:~ Returns all Taskflows :)
-declare function cdi:getTaskflows($db as xs:string) as map(*)*
+(: Connections - inside .Connection.zip :)
+cdi:connection-paths($db) :=
+  db:list-details($db)[@raw='true']
+    [ends-with(lower-case(text()), '/connection.json')]/text()
 
-(:~ Dependency analysis: what a mapping depends on (connections) :)
-declare function cdi:getMappingDependencies($db as xs:string, $mappingId as xs:string) as element()
-
-(:~ Dependency analysis: what a task depends on (mapping + connections) :)
-declare function cdi:getTaskDependencies($db as xs:string, $taskId as xs:string) as element()
-
-(:~ Dependency analysis: full taskflow dependency tree :)
-declare function cdi:getTaskflowDependencies($db as xs:string, $tfId as xs:string) as element()
-
-(:~ Impact: which tasks/taskflows use a given mapping or connection :)
-declare function cdi:getImpact($db as xs:string, $id as xs:string) as element()
+(: Package export metadata :)
+cdi:metadata-path($db) :=
+  db:list-details($db)[@raw='true']
+    [ends-with(lower-case(text()), 'exportmetadata.v2.json')]/text()
 ```
 
-**BaseX JSON access pattern** (JSON stored as maps/arrays):
+### Corrected dependency extraction
+
 ```xquery
-let $json      := json:parse(db:get($db, $path)/text())
-let $name      := $json?name
-let $sources   := $json?sources?*  (: iterate array :)
-for $src in $sources
-  let $connId  := $src?connectionId
-  ...
+(: Mapping -> Connections via references array :)
+for $ref in $m?references?*
+  where $ref?refType = 'connection'
+  let $fedId := substring-after(string($ref?refObjectId), '@')
+  let $conn  := cdi:getConnectionByFederatedId($dbname, $fedId)
+  return <dependency objectName="{$conn?name}" .../>
+
+(: Task -> Mapping via mappingId (cross-package federatedId) :)
+let $mappingFedId := substring-after(string($t?mappingId), '@')
+
+(: Task -> Connections via parameters array :)
+for $p in $t?parameters?*
+  let $connFedId :=
+    substring-after(
+      string(($p?sourceConnectionId, $p?targetConnectionId)[. != ''][1]),
+      '@')
+  return <dependency .../>
 ```
 
-### CDI Dependency Types
+### CDI Dependency Types (revised)
 
 | From | Depends On | Dependency Type |
 |------|-----------|-----------------|
-| Mapping | Connection (source/target/lookup) | data connection |
-| Mapping Task | Mapping | mapping reference |
-| Mapping Task | Connection (override) | connection override |
-| Taskflow | Mapping Task | task step |
-| Taskflow | Taskflow | nested taskflow step |
+| Mapping | Connection (via `references[refType=connection]`) | connection reference |
+| Mapping Task | Mapping (via `mappingId`) | mapping reference |
+| Mapping Task | Connection (via `parameters[sourceConnectionId/targetConnectionId]`) | connection override |
+
+No standalone CDI Taskflow ZIPs found. CAI Taskflows (`.TASKFLOW.xml`) remain in the
+existing analysis path via `ipd-metadata.xqm`.
 
 ---
 
