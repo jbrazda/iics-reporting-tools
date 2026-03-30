@@ -272,7 +272,7 @@ declare %private %updating function iics:create-db-from-zip(
     db:create($dbname, $xmlDocs, $xmlEntries),
     (: Store nested ZIPs as binary — background job will expand them :)
     for $zipEntry in $zipEntries
-      return db:put-binary($dbname, archive:extract-binary($zip, ($zipEntry)), $zipEntry)
+      return db:store($dbname, $zipEntry, archive:extract-binary($zip, ($zipEntry)))
   )
 };
 

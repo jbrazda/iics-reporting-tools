@@ -56,8 +56,9 @@ declare %updating function cdi:index-nested-zip(
  : @param  $dbname  target database name
  :)
 declare %updating function cdi:process-nested-zips($dbname as xs:string) {
-  for $path in db:list($dbname)[ends-with(lower-case(.), '.zip')]
-    let $bin := db:get-binary($dbname, $path)
+  for $path in db:list-details($dbname)[@raw = 'true']
+                [ends-with(lower-case(text()), '.zip')]/text()
+    let $bin := db:retrieve($dbname, $path)
     return (
       cdi:index-nested-zip($dbname, $path, $bin),
       db:delete($dbname, $path)
