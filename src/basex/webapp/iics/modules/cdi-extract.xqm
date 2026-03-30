@@ -40,17 +40,19 @@ declare %updating function cdi:index-nested-zip(
 ) {
   let $basePath    := replace($zipPath, '(?i)\.zip$', '') || '/'
   let $entries     := archive:entries($zip)/string()
-  let $xmlEntries  := $entries[ends-with(lower-case(.), '.xml')][not(starts-with(., '__MACOSX/'))]
-  let $jsonEntries := $entries[ends-with(lower-case(.), '.json')][not(starts-with(., '__MACOSX/'))]
-  (: Store XML entries as parsed document nodes :)
-  for $entry in $xmlEntries
+  let $textEntries := $entries[
+    (ends-with(lower-case(.), '.xml') or ends-with(lower-case(.), '.json'))
+    and not(starts-with(., '__MACOSX/'))
+  ]
+  for $entry in $textEntries
     let $content := archive:extract-text($zip, ($entry))
-    return db:add($dbname, fn:parse-xml($content), $basePath || $entry)
-  ,
-  (: Store JSON entries as binary resources (preserves raw text for json:parse later) :)
-  for $entry in $jsonEntries
-    let $content := archive:extract-text($zip, ($entry))
-    return db:store($dbname, $basePath || $entry, convert:string-to-base64($content, 'UTF-8'))
+    return
+      if (ends-with(lower-case($entry), '.json')) then
+        (: JSON stored as binary so json:parse() can read it back cleanly :)
+        db:store($dbname, $basePath || $entry, convert:string-to-base64($content, 'UTF-8'))
+      else
+        (: XML stored as a parsed document node :)
+        db:add($dbname, fn:parse-xml($content), $basePath || $entry)
 };
 
 (:~
