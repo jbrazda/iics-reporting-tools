@@ -20,6 +20,7 @@ module namespace cdi = 'iics/cdi-extract';
 declare namespace db      = "http://basex.org/modules/db";
 declare namespace archive = "http://basex.org/modules/archive";
 declare namespace file    = "http://expath.org/ns/file";
+declare namespace convert = "http://basex.org/modules/convert";
 
 (:~
  : Extracts text (JSON/XML) entries from a single nested ZIP archive and indexes them into
@@ -39,12 +40,17 @@ declare %updating function cdi:index-nested-zip(
 ) {
   let $basePath    := replace($zipPath, '(?i)\.zip$', '') || '/'
   let $entries     := archive:entries($zip)/string()
-  let $textEntries := $entries[
-    ends-with(lower-case(.), '.json') or ends-with(lower-case(.), '.xml')
-  ][not(starts-with(., '__MACOSX/'))]
-  for $entry in $textEntries
+  let $xmlEntries  := $entries[ends-with(lower-case(.), '.xml')][not(starts-with(., '__MACOSX/'))]
+  let $jsonEntries := $entries[ends-with(lower-case(.), '.json')][not(starts-with(., '__MACOSX/'))]
+  (: Store XML entries as parsed document nodes :)
+  for $entry in $xmlEntries
     let $content := archive:extract-text($zip, ($entry))
-    return db:add($dbname, $content, $basePath || $entry)
+    return db:add($dbname, fn:parse-xml($content), $basePath || $entry)
+  ,
+  (: Store JSON entries as binary resources (preserves raw text for json:parse later) :)
+  for $entry in $jsonEntries
+    let $content := archive:extract-text($zip, ($entry))
+    return db:store($dbname, $basePath || $entry, convert:string-to-base64($content, 'UTF-8'))
 };
 
 (:~

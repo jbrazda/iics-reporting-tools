@@ -2,6 +2,8 @@ module namespace report = 'iics/report';
 
 import module namespace html   = 'iics/html' at 'modules/html.xqm';
 import module namespace mhtml  = 'iics/ipd-metadata-html' at 'modules/ipd-metadata-html.xqm';
+import module namespace chtml  = 'iics/cdi-metadata-html' at 'modules/cdi-metadata-html.xqm';
+import module namespace cdi    = 'iics/cdi-metadata'      at 'modules/cdi-metadata.xqm';
 
 (:ICAI namespaces:)
 declare namespace sfd = "http://schemas.active-endpoints.com/appmodules/screenflow/2010/10/avosScreenflow.xsd";
@@ -189,6 +191,7 @@ function report:start(
                 <li><a href="#processObjects">Process Objects</a></li>
                 <li><a href="#processes">Processes</a></li>
                 <li><a href="#guides">Guides</a></li>
+                { if (cdi:hasCDIAssets($database)) then <li><a href="#cdi">CDI Assets</a></li> else () }
             </ul>
             <div id="summary">
                 <h2>Summary</h2>
@@ -690,6 +693,13 @@ function report:start(
                 </tbody>
                 </table>
             </div> <!--END div #guides-->
+            {
+              if (cdi:hasCDIAssets($database)) then
+                <div id="cdi">
+                  { chtml:CDISection($database) }
+                </div>
+              else ()
+            }
         </div> <!--END div #tabs-->
     </body>
 )};

@@ -91,4 +91,36 @@ $(function () {
     // ── jQuery UI buttons in header ───────────────────────────────────────────
     $('.ui-header-button').button();
 
+    // ── CDI asset sub-tabs ────────────────────────────────────────────────────
+    if ($('#cdi-tabs').length) {
+        $('#cdi-tabs').tabs({
+            activate: function (event, ui) {
+                // Initialize DataTable lazily when its tab is first shown
+                var tableId = ui.newPanel.find('table.display').attr('id');
+                if (tableId && !$.fn.DataTable.isDataTable('#' + tableId)) {
+                    $('#' + tableId).DataTable({
+                        jQueryUI   : true,
+                        scrollX    : true,
+                        paging     : true,
+                        lengthMenu : [[25, 50, 100, -1], [25, 50, 100, 'All']],
+                        dom        : 'BlfrtFip',
+                        buttons    : ['colvis', 'copy', 'csvHtml5', 'print']
+                    });
+                }
+            }
+        });
+        // Init first CDI tab's table immediately
+        var $firstCdiTable = $('#cdi-tabs .ui-tabs-panel:first table.display');
+        if ($firstCdiTable.length && !$.fn.DataTable.isDataTable($firstCdiTable)) {
+            $firstCdiTable.DataTable({
+                jQueryUI   : true,
+                scrollX    : true,
+                paging     : true,
+                lengthMenu : [[25, 50, 100, -1], [25, 50, 100, 'All']],
+                dom        : 'BlfrtFip',
+                buttons    : ['colvis', 'copy', 'csvHtml5', 'print']
+            });
+        }
+    }
+
 });
