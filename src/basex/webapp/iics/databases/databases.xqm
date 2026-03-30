@@ -149,7 +149,7 @@ function iics:upload(
   (: Fall back to deriving name from filename if JS did not populate the hidden field :)
   let $name     := let $n := normalize-space(($dbname, '')[1])
                    return if ($n != '') then $n
-                          else replace(replace($filename, '(?i)\.zip$', ''), '[^a-zA-Z0-9_\-]', '_')
+                          else replace(replace($filename, '\.zip$', '', 'i'), '[^a-zA-Z0-9_\-]', '_')
   return
   if (empty($zip) or string-length($name) = 0) then
     update:output(iics:upload-error('No file or database name provided. Please select a ZIP file and try again.'))

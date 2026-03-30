@@ -38,7 +38,7 @@ declare %updating function cdi:index-nested-zip(
   $zipPath as xs:string,
   $zip     as xs:base64Binary
 ) {
-  let $basePath    := replace($zipPath, '(?i)\.zip$', '') || '/'
+  let $basePath    := replace($zipPath, '\.zip$', '', 'i') || '/'
   let $entries     := archive:entries($zip)/string()
   let $textEntries := $entries[
     (ends-with(lower-case(.), '.xml') or ends-with(lower-case(.), '.json'))
