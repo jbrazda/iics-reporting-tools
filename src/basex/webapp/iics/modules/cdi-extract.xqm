@@ -112,12 +112,12 @@ declare %updating function cdi:extract-from-package(
     (: Remove the temp file :)
     file:delete($zipPath)
     ,
-    (: Chain a cache build job - runs after this transaction completes :)
+    (: Chain a cache build job - runs after this transaction completes.
+       Read the job file as text and pass inline; file-based job:eval
+       does not persist updates in BaseX 12.2 HTTP server context. :)
     update:output(
       job:eval(
-        "declare variable $db external;" ||
-        "import module namespace cache = 'iics/cache' at 'modules/cache.xqm';" ||
-        " cache:build($db)",
+        file:read-text(file:base-dir() || 'cache-build-job.xq'),
         map { 'db': $dbname },
         map { 'base-uri': file:base-dir() }
       )

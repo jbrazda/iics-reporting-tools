@@ -253,12 +253,15 @@ function api:cache-rebuild($database as xs:string) as xs:string {
   if ($database = '') then api:error('database parameter is required')
   else if (not(db:exists($database))) then api:error('Database not found: ' || $database)
   else
-    let $jobId := job:eval(
-      "declare variable $db external;" ||
-      "import module namespace cache = 'iics/cache' at 'modules/cache.xqm';" ||
-      " cache:build($db)",
+    (: Read the job file as text and pass to job:eval as inline query.
+       File-based job:eval does not persist updates in BaseX 12.2 HTTP server context;
+       reading the file content and passing it as an inline string works correctly. :)
+    let $jobFile := file:base-dir() || 'modules/cache-build-job.xq'
+    let $jobQuery := file:read-text($jobFile)
+    let $jobId   := job:eval(
+      $jobQuery,
       map { 'db': $database },
-      map { 'base-uri': file:base-dir() }
+      map { 'base-uri': file:base-dir() || 'modules/' }
     )
     return api:to-json(map { 'jobId': $jobId, 'database': $database })
 };

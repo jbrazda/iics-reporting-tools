@@ -475,8 +475,8 @@ declare function imf:getServiceDependencies (
    $parentDesign as node()?, 
    $parentFlows as xs:string*
 ) as node()* {
-     let $fromName           := $parentDesign/rep:GUID/text()
-     let $fromGuid           := $parentDesign/rep:Name/text()
+     let $fromGuid           := $parentDesign/rep:GUID/text()
+     let $fromName           := $parentDesign/rep:Name/text()
      let $fromDisplayName    := $parentDesign/rep:DisplayName/text()
      let $parentStack        := ($parentFlows,$fromGuid)
      let $design             := $parentDesign/rep:Entry/* 

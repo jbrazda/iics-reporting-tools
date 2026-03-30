@@ -55,7 +55,7 @@ declare function cdi:parse-json($dbname as xs:string, $path as xs:string) as map
  : @return sequence of paths ending in /mappingTemplate.json (case-insensitive)
  :)
 declare function cdi:mapping-paths($dbname as xs:string) as xs:string* {
-  db:list-details($dbname)[@raw = 'true']
+  db:list-details($dbname)[@type = 'binary']
     [ends-with(lower-case(text()), '/mappingtemplate.json')]/text()
 };
 
@@ -67,7 +67,7 @@ declare function cdi:mapping-paths($dbname as xs:string) as xs:string* {
  : @return sequence of paths ending in /mtTask.json (case-insensitive)
  :)
 declare function cdi:task-paths($dbname as xs:string) as xs:string* {
-  db:list-details($dbname)[@raw = 'true']
+  db:list-details($dbname)[@type = 'binary']
     [ends-with(lower-case(text()), '/mttask.json')]/text()
 };
 
@@ -79,7 +79,7 @@ declare function cdi:task-paths($dbname as xs:string) as xs:string* {
  : @return sequence of paths ending in /connection.json (case-insensitive)
  :)
 declare function cdi:connection-paths($dbname as xs:string) as xs:string* {
-  db:list-details($dbname)[@raw = 'true']
+  db:list-details($dbname)[@type = 'binary']
     [ends-with(lower-case(text()), '/connection.json')]/text()
 };
 
@@ -347,7 +347,7 @@ declare function cdi:getImpact(
  :)
 declare function cdi:hasCDIAssets($dbname as xs:string) as xs:boolean {
   exists(
-    db:list-details($dbname)[@raw = 'true'][
+    db:list-details($dbname)[@type = 'binary'][
       ends-with(lower-case(text()), '/mappingtemplate.json') or
       ends-with(lower-case(text()), '/mttask.json')
     ]
