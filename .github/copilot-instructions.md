@@ -125,3 +125,8 @@ declare variable $mhtml:IPD_TYPES := map {
 ### Static Assets
 
 Third-party libraries (DataTables, Plotly) are vendored under `src/basex/webapp/iics/static/external/` — do not reference CDN URLs.
+
+## Markdown Authoring Rules
+
+- Follow [Markdown Lint](https://github.com/DavidAnson/markdownlint) rules in all generated Markdown.
+- Do not use em dashes (--) in generated Markdown; use a regular hyphen (-) instead.
