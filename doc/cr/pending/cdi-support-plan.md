@@ -14,6 +14,22 @@ assets (Mappings, Mapping Tasks, Taskflows) stored as JSON. This plan adds:
 
 ---
 
+## Test Package
+
+Primary test package for CDI functionality:
+
+- **Windows path**: `C:\Users\NCVJ9B\Downloads\iics\NATL_ClaimCenter_GW.zip`
+- **Linux path**: Upload via the web UI at `http://localhost:8984/iics/database`
+  or copy to the server and use `ant basex.create.db`
+
+Secondary test packages available on the Linux server:
+
+- `/home/jbrazda/Downloads/s3_test/CI-CD-Demo_2021-04-07-172924_a5f9150d.zip`
+  Used for Phase 1 and Phase 2 verification (1 mapping, 1 task, 2 connections confirmed)
+- Previous uploads: `NATL_ClaimCenter_GW_iics_tag_build` database on the BaseX server
+
+---
+
 ## Root Cause Analysis - CDI Assets Not Appearing (2024-03-30)
 
 Direct inspection of the running BaseX server and available IICS packages on this host
@@ -119,175 +135,206 @@ Packages contain useful JSON at the top level that is currently ignored:
 
 ## Current State Summary
 
-| Area | Current | Gap |
-|------|---------|-----|
-| Upload | Extracts `.xml` files from top-level ZIP only | Nested ZIPs, JSON files ignored |
-| Metadata analysis | `ipd-metadata.xqm` - full CAI XML support | No CDI JSON support |
-| Dependency traversal | Recursive on every page load - expensive | No caching; blocks HTTP response |
-| API | All endpoints return HTML only | No JSON API for graph UIs or external consumers |
-| Visualization | DataTables + jQuery UI tabs | No graph/network visualization |
+| Area | Previous | Current | Gap |
+|------|---------|---------|-----|
+| Upload | Extracts `.xml` from top-level ZIP only | XML + nested ZIP JSON extracted in background job | - |
+| CDI extraction | Not supported | `cdi:extract-from-package` indexes JSON as binary, XML as docs | - |
+| CDI metadata | Not supported | `cdi-metadata.xqm` queries mappings, tasks, connections | Cross-package federatedId resolution |
+| CDI HTML | Not supported | `cdi-metadata-html.xqm` renders Mappings/Tasks/Connections tables | Detail pages not yet wired |
+| Dependency traversal | Recursive on every page load - expensive | Still recursive | Phase 3 cache needed |
+| API | All endpoints return HTML only | Still HTML only | Phase 4 |
+| Visualization | DataTables + jQuery UI tabs | Same | Phase 5 |
 
 ---
 
-## Architecture Overview (revised)
+## Architecture Overview (implemented)
 
 ```
 Upload ZIP
    |
-   +-- iics:create-db-from-zip (Transaction 1 - sync)
-   |     +-- Extract .xml -> parse-xml() -> db:create()
-   |     +-- Write original ZIP to temp file (already done by iics:upload)
-   |     +-- Schedule background job -> jobs:eval(zipPath)
+   +-- iics:create-db-from-zip (Transaction 1 - sync) [IMPLEMENTED]
+   |     +-- Extract .xml -> fn:parse-xml() -> db:create()
+   |     +-- Write original ZIP to temp file (iics:upload / iics:upload-overwrite)
+   |     +-- Schedule background job -> jobs:eval(dbname, zipPath)
    |
-   +-- Background Job: cdi:extract-from-package($dbname, $zipPath) (Transaction 2 - async)
-         +-- Store top-level JSON via db:store()
+   +-- Background Job: cdi:extract-from-package($dbname, $zipPath) (Transaction 2 - async) [IMPLEMENTED]
+         +-- Store top-level JSON via db:store() as binary
          |    (exportMetadata.v2.json, *.Folder.json)
          +-- For each nested .zip entry:
          |    +-- archive:extract-binary() -> cdi:index-nested-zip()
-         |    +-- JSON files: db:store() as binary (for json:parse later)
+         |    +-- JSON: db:store() as xs:base64Binary (for json:parse later)
+         |    +-- XML: fn:parse-xml() -> db:add()
          +-- Delete temp ZIP file
-         +-- (Future) Trigger cache pre-computation job
+         +-- (Future Phase 3) Trigger cache pre-computation job
 ```
 
 ---
 
-## Phase 1 — Nested ZIP Extraction Background Job (revised)
+## Phase 1 - Nested ZIP Extraction Background Job [COMPLETE - commit 60cdd0d, 559903a, c86754e]
 
-### Files to change
-- `databases/databases.xqm` — trigger background job after DB creation
-- `modules/cdi-extract.xqm` (NEW) — background extraction logic
+### Files changed
 
-### Approach
+- `databases/databases.xqm`
+- `modules/cdi-extract.xqm` (new)
 
-**Step 1a – Extend `iics:create-db-from-zip`** to also store nested ZIPs as binary:
+### What was implemented
+
+**`databases.xqm` - `iics:create-db-from-zip`** now creates an XML-only database:
 
 ```xquery
-let $allEntries   := archive:entries($zip)/string()
-let $xmlEntries   := $allEntries[ends-with(lower-case(.), '.xml')]
-let $zipEntries   := $allEntries[ends-with(lower-case(.), '.zip')]
-let $xmlDocs      := archive:extract-text($zip, $xmlEntries)
-let $_            := db:create($dbname, $xmlDocs, $xmlEntries)
-let $zipBinaries  := archive:extract-binary($zip, $zipEntries)
-(: Store nested ZIPs as binary documents :)
-let $_            := for-each-pair($zipEntries, $zipBinaries,
-                       function($path, $bin) { db:put-binary($dbname, $bin, $path) })
-(: Schedule extraction job :)
-return jobs:eval(
-  "import module namespace cdi = 'iics/cdi-extract' at 'modules/cdi-extract.xqm';
-   cdi:process-nested-zips($dbname)",
-  map { 'dbname': $dbname },
-  map { 'base-uri': file:base-dir() }
+let $allEntries := archive:entries($zip)/string()
+let $xmlEntries := $allEntries[ends-with(lower-case(.), '.xml')
+                                and not(starts-with(., '__MACOSX/'))]
+let $xmlDocs    := archive:extract-text($zip, $xmlEntries)
+return db:create($dbname, $xmlDocs, $xmlEntries)
+```
+
+**`databases.xqm` - `iics:upload` and `iics:upload-overwrite`** write temp file and schedule job:
+
+```xquery
+let $tmpfile := file:temp-dir() || '_iics_upload_' || $name || '.zip'
+return (
+  file:write-binary($tmpfile, $zip),
+  iics:create-db-from-zip($name, $zip),
+  update:output(
+    let $_ := jobs:eval(
+      "import module namespace cdi = 'iics/cdi-extract' at '../modules/cdi-extract.xqm';" ||
+      " cdi:extract-from-package($db, $zip)",
+      map { 'db': $name, 'zip': $tmpfile },
+      map { 'base-uri': file:base-dir() }
+    )
+    return web:redirect('/iics/report', map { 'database': $name })
+  )
 )
 ```
 
-**Step 1b – `cdi-extract.xqm`** background processing:
+**`cdi-extract.xqm` - `cdi:extract-from-package($dbname, $zipPath)`**:
 
-```xquery
-declare %updating function cdi:process-nested-zips($dbname as xs:string) {
-  let $db := db:open($dbname)
-  for $path in db:list-details($dbname)[ends-with(@path, '.zip')]/@path/string()
-    let $zip     := db:get-binary($dbname, $path)
-    let $entries := archive:entries($zip)/string()
-    let $jsonEntries := $entries[ends-with(lower-case(.), '.json')]
-    let $xmlEntries  := $entries[ends-with(lower-case(.), '.xml')]
-    let $basePath    := replace($path, '\.zip$', '') || '/'
-    return (
-      for-each-pair($jsonEntries, archive:extract-text($zip, $jsonEntries),
-        function($p, $content) {
-          db:add($dbname, $content, $basePath || $p)
-        }),
-      for-each-pair($xmlEntries, archive:extract-text($zip, $xmlEntries),
-        function($p, $content) {
-          db:add($dbname, $content, $basePath || $p)
-        }),
-      db:delete($dbname, $path)  (: Remove raw binary after extraction :)
-    )
-};
-```
+- Reads ZIP from filesystem via `file:read-binary($zipPath)`
+- Stores top-level JSON as binary via `db:store()`
+- Expands each nested `.zip` entry via `cdi:index-nested-zip()`
+- Deletes the temp file when done
 
-### CDI JSON Path Conventions (based on known package structure)
+**`cdi-extract.xqm` - `cdi:index-nested-zip($dbname, $zipPath, $zip)`**:
 
-```
-Explore/
-  CDI/
-    MP_SomeMapping/
-      mapping.json          ← Mapping definition
-    MT_SomeTask/
-      mappingtask.json      ← Mapping Task
-    TF_SomeFlow/
-      taskflow.json         ← Taskflow
-    connections.json        ← Connection catalog
-```
+- JSON entries: `db:store($dbname, $basePath || $entry, convert:string-to-base64(...))`
+- XML entries: `db:add($dbname, fn:parse-xml($content), $basePath || $entry)`
+- Base path derived by stripping `.zip` extension: `replace($zipPath, '\.zip$', '', 'i') || '/'`
+
+### Key technical constraints (BaseX 9.x)
+
+- `db:create` and `db:store` **cannot** be in the same updating transaction
+- `db:store` calls `db:open` during evaluation - fails if DB is still in pending update list
+- Solution: `db:create` in Transaction 1, `db:store` in Transaction 2 (background job)
+- Binary read: `db:retrieve($name, $path)` returns `xs:base64Binary`
+- Binary store: `db:store($name, $path, xs:base64Binary)`
+- List binary resources: `db:list-details($name)[@raw='true']/text()`
+- XQuery regex - no PCRE `(?i)` inline flags; use `replace($s, $pat, $rep, 'i')`
 
 ---
 
-## Phase 2 (revised) — CDI Metadata Module
+## Phase 2 - CDI Metadata Module [COMPLETE - commit fabe799, c86754e]
 
-### Files to change
+### Files changed
 
-- `modules/cdi-metadata.xqm` - fix path patterns and JSON field accessors
-- `modules/cdi-metadata-html.xqm` - update table columns and detail view field names
+- `modules/cdi-metadata.xqm` (new)
+- `modules/cdi-metadata-html.xqm` (new)
+- `designs_report.xqm` (CDI tab added)
+- `static/iics-reporting.js` (CDI sub-tabs DataTables init)
 
-### Corrected path patterns
+### Actual CDI package structure (verified from live packages)
+
+| Asset type | Nested ZIP extension | JSON file inside |
+|-----------|---------------------|-----------------|
+| Mapping Template | `.DTEMPLATE.zip` | `mappingTemplate.json` |
+| Mapping Task | `.MTT.zip` | `mtTask.json` |
+| Connection | `.Connection.zip` | `connection.json` |
+| Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` |
+| B2B Customer | `.B2BGW_CUSTOMER.zip` | (skip) |
+| AgentGroup | `.AgentGroup.zip` | `runtimeEnvironment.json` |
+
+No standalone CDI Taskflow nested ZIPs found in any surveyed package.
+CAI Taskflows remain as `.TASKFLOW.xml` in the top-level ZIP.
+
+### Path patterns (implemented)
 
 ```xquery
 (: Mappings - inside .DTEMPLATE.zip :)
-cdi:mapping-paths($db) :=
-  db:list-details($db)[@raw='true']
-    [ends-with(lower-case(text()), '/mappingtemplate.json')]/text()
+db:list-details($db)[@raw='true']
+  [ends-with(lower-case(text()), '/mappingtemplate.json')]/text()
 
 (: Tasks - inside .MTT.zip :)
-cdi:task-paths($db) :=
-  db:list-details($db)[@raw='true']
-    [ends-with(lower-case(text()), '/mttask.json')]/text()
+db:list-details($db)[@raw='true']
+  [ends-with(lower-case(text()), '/mttask.json')]/text()
 
 (: Connections - inside .Connection.zip :)
-cdi:connection-paths($db) :=
-  db:list-details($db)[@raw='true']
-    [ends-with(lower-case(text()), '/connection.json')]/text()
-
-(: Package export metadata :)
-cdi:metadata-path($db) :=
-  db:list-details($db)[@raw='true']
-    [ends-with(lower-case(text()), 'exportmetadata.v2.json')]/text()
+db:list-details($db)[@raw='true']
+  [ends-with(lower-case(text()), '/connection.json')]/text()
 ```
 
-### Corrected dependency extraction
+### JSON parsing (critical: must use `format:'xquery'`)
+
+```xquery
+(: WRONG - returns XML document, not XQuery map :)
+let $parsed := json:parse($text)
+
+(: CORRECT - returns XQuery map/array :)
+let $parsed := json:parse($text, map { 'format': 'xquery' })
+```
+
+### Dependency extraction (implemented)
 
 ```xquery
 (: Mapping -> Connections via references array :)
 for $ref in $m?references?*
-  where $ref?refType = 'connection'
+  where string($ref?refType) = 'connection'
   let $fedId := substring-after(string($ref?refObjectId), '@')
   let $conn  := cdi:getConnectionByFederatedId($dbname, $fedId)
   return <dependency objectName="{$conn?name}" .../>
 
-(: Task -> Mapping via mappingId (cross-package federatedId) :)
+(: Task -> Mapping via mappingId (strip @ prefix to get federatedId) :)
 let $mappingFedId := substring-after(string($t?mappingId), '@')
 
 (: Task -> Connections via parameters array :)
 for $p in $t?parameters?*
-  let $connFedId :=
-    substring-after(
-      string(($p?sourceConnectionId, $p?targetConnectionId)[. != ''][1]),
-      '@')
-  return <dependency .../>
+  let $srcRef := string($p?sourceConnectionId)
+  let $tgtRef := string($p?targetConnectionId)
+  for $ref in ($srcRef[. != ''], $tgtRef[. != ''])
+    ...
 ```
 
-### CDI Dependency Types (revised)
+### CDI Dependency types (implemented)
 
 | From | Depends On | Dependency Type |
 |------|-----------|-----------------|
-| Mapping | Connection (via `references[refType=connection]`) | connection reference |
-| Mapping Task | Mapping (via `mappingId`) | mapping reference |
-| Mapping Task | Connection (via `parameters[sourceConnectionId/targetConnectionId]`) | connection override |
+| Mapping | Connection (via `references[refType=connection]`) | `connectionReference` |
+| Mapping Task | Mapping (via `mappingId`) | `mappingReference` |
+| Mapping Task | Connection (via `parameters[sourceConnectionId/targetConnectionId]`) | `sourceConnection` / `targetConnection` |
 
-No standalone CDI Taskflow ZIPs found. CAI Taskflows (`.TASKFLOW.xml`) remain in the
-existing analysis path via `ipd-metadata.xqm`.
+### HTML rendering (`cdi-metadata-html.xqm`)
+
+Three tabs rendered by `chtml:CDISection($dbname)`:
+
+- **Mappings** - table: Name, Connections count, Path
+- **Mapping Tasks** - table: Name, Mapping FederatedId, Path
+- **Connections** - table: Name, FederatedId, Type, Path
+
+Detail functions `chtml:MappingDetail` and `chtml:TaskDetail` use name-based lookup.
+
+### Verification (CI-CD-Demo_2021-04-07-172924_a5f9150d.zip)
+
+```
+XML docs: 4
+Binary (JSON) resources: 13
+  - mappingTemplate.json -> m_SFDC_FF_Accounts (1 mapping)
+  - mtTask.json -> mct_SFDC_FF_Accounts (1 task)
+  - connection.json -> FF_NA_Staging_Salesforce, Salesforce (2 connections)
+Dependencies resolved: m_SFDC_FF_Accounts -> [FF_NA_Staging_Salesforce, Salesforce]
+```
 
 ---
 
-## Phase 3 — Dependency Graph Cache
+## Phase 3 - Dependency Graph Cache [PENDING]
 
 ### Problem
 `imf:getObjectDependencies()` and `imf:getObjectImpact()` perform full recursive traversal
@@ -349,7 +396,7 @@ declare function api:get-dependencies($dbname, $guid) {
 
 ---
 
-## Phase 4 — REST/JSON API Layer
+## Phase 4 - REST/JSON API Layer [PENDING]
 
 ### New file: `api.xqm`
 
@@ -402,7 +449,7 @@ function api:dependencies($db as xs:string, $guid as xs:string) {
 
 ---
 
-## Phase 5 — Visualization with vis.js
+## Phase 5 - Visualization with vis.js [PENDING]
 
 ### Recommendation: vis.js Network (already chosen)
 
@@ -440,7 +487,7 @@ Add a 4th tab "Dependency Graph" to the existing tabs:
 
 ---
 
-## Phase 6 — Unified Asset Registry
+## Phase 6 - Unified Asset Registry [PENDING]
 
 To support both CAI and CDI in the same reporting views, create a unified asset catalogue
 stored in `_meta/catalogue.json` per database:
@@ -463,23 +510,27 @@ The `databases.xqm` list page and REST API both read from it for fast asset enum
 
 ## Implementation Priority / Phasing
 
-| Phase | Priority | Effort | Value |
-|-------|----------|--------|-------|
-| 1 — Nested ZIP extraction | HIGH | Medium | Unlocks CDI |
-| 3 — Dependency cache | HIGH | Medium | Performance fix for existing pages |
-| 4 — REST API (`api.xqm`) | HIGH | Medium | Foundation for graph UI |
-| 2 — CDI metadata module | MEDIUM | High | New asset type support |
-| 5 — vis.js graph view | MEDIUM | Medium | UX improvement |
-| 6 — Unified catalogue | LOW | Low | Polish |
+| Phase | Status | Priority | Effort | Value |
+|-------|--------|----------|--------|-------|
+| 1 - Nested ZIP extraction | DONE (c86754e) | HIGH | Medium | Unlocks CDI |
+| 2 - CDI metadata module | DONE (c86754e) | MEDIUM | High | New asset type support |
+| 3 - Dependency cache | PENDING | HIGH | Medium | Performance fix for existing pages |
+| 4 - REST API (`api.xqm`) | PENDING | HIGH | Medium | Foundation for graph UI |
+| 5 - vis.js graph view | PENDING | MEDIUM | Medium | UX improvement |
+| 6 - Unified catalogue | PENDING | LOW | Low | Polish |
 
 ---
 
 ## Key Technical Notes
 
 ### BaseX JSON Support
-- JSON documents stored natively: `db:add($name, $text, 'path.json')` 
-- Query: `json:parse(db:get($name, 'path.json')/text())` → returns XQuery map
-- Array iteration: `$map?arrayKey?*` 
+
+- JSON stored as **binary** via `db:store($name, $path, xs:base64Binary)`
+  (storing as text/XML causes parsing issues at retrieval time)
+- Retrieve: `let $bin := db:retrieve($name, $path)`
+- Parse to XQuery map: `json:parse(convert:binary-to-string($bin, 'UTF-8'), map{'format':'xquery'})`
+  - **Critical**: must use `map{'format':'xquery'}` - default format returns XML, not maps
+- Array iteration: `$map?arrayKey?*`
 - Serialize to JSON: `serialize($data, map{'method':'json'})`
 
 ### BaseX Background Jobs
@@ -519,3 +570,12 @@ declare function cache:to-vis-graph($deps as element()) as map(*) {
 ---
 
 ## Todos
+
+| ID | Phase | Status |
+|----|-------|--------|
+| p1-extract | Phase 1 - Nested ZIP extraction | DONE |
+| p2-cdi-module | Phase 2 - CDI metadata module | DONE |
+| p3-cache | Phase 3 - Dependency cache (`modules/cache.xqm`) | PENDING |
+| p4-api | Phase 4 - JSON REST API layer (`api.xqm`) | PENDING |
+| p5-vis | Phase 5 - vis.js graph visualization (`graph.xqm`) | PENDING |
+| p6-catalogue | Phase 6 - Unified CAI+CDI asset catalogue | PENDING |
