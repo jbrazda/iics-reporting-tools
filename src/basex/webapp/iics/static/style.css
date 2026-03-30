@@ -340,4 +340,27 @@ ul.tree, ul.tree ul {
   color:chocolate;
 }
 
+/* Upload button in the page header */
+.indexHeaderAction {
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.indexHeaderAction .infaButton-1 {
+    background: #2a6496;
+    border-color: #1e4d79;
+    color: #fff;
+    white-space: nowrap;
+    padding: 0 10px;
+    min-height: 26px;
+    border-radius: 3px;
+}
+
+.indexHeaderAction .infaButton-1:hover {
+    background: #3a7fc1;
+    border-color: #2a6496;
+}
+
 

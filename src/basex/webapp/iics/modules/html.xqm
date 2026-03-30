@@ -38,9 +38,12 @@ declare
         <title>IICS{ ($header, tail($options?header)) ! (' » ' || .) }</title>
         <meta name="description" content="IICS Reporting Tool"/>
         <meta name="author" content="Jaroslav Brazda 2019, MIT License"/>
-        <link rel="stylesheet" type="text/css" href="static/style.css"/>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
+        <link rel="stylesheet" type="text/css" href="/iics/static/style.css"/>
         { $options?css ! <link rel="stylesheet" type="text/css" href="{ . }"/> }
-        <script type="text/javascript" src="static/js.js"/>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"/>
+        <script type="text/javascript" src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"/>
+        <script type="text/javascript" src="/iics/static/iics-reporting.js"/>
         { $options?scripts ! <script type="text/javascript" src="{ . }"/> }
         { $options?inlineScripts ! . }
         </head>
@@ -88,6 +91,7 @@ declare
             </div>
             <div class="indexHeaderRight">
                 <div class="indexHeaderMenus">
+                    { $options?headerActions }
                     <div class="indexHelpMenu" data-id="HelpMenu">
                         <a href="https://github.com/jbrazda/iics-reporting-tools/blob/master/README.md" class="breadCrumbs"><button
                             class="infaButton infaButton-toolbar-icon infaButton-dark infaButton-toolbar-icon-anim"

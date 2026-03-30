@@ -102,8 +102,8 @@ function report:start(
     return html:wrap(map { 
       'header' : ($database),  
       'error'  : $error, 
-      'css'    : ('https://cdn.datatables.net/v/ju-1.11.4/jq-2.2.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/r-2.1.1/se-1.2.2/datatables.min.css'),
-      'scripts': ('https://cdn.datatables.net/v/ju-1.11.4/jq-2.2.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/r-2.1.1/se-1.2.2/datatables.min.js', 
+      'css'    : ('https://cdn.datatables.net/v/ju-1.11.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/r-2.1.1/se-1.2.2/datatables.min.css'),
+      'scripts': ('https://cdn.datatables.net/v/ju-1.11.4/jszip-3.1.3/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/b-print-1.3.1/r-2.1.1/se-1.2.2/datatables.min.js', 
                   'https://cdn.plot.ly/plotly-latest.min.js'),
       'inlineScripts' : 
       <script type="text/javascript" charset="utf-8">
