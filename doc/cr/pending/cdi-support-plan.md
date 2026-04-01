@@ -599,12 +599,12 @@ The project already has `sample-data/graph-vis/basic.html` with vis.js. This is 
 
 ### Alternative Options (for awareness)
 
-| Library | Strength | Weakness |
-|---------|----------|---------|
-| **vis.js Network** ✅ | Already adopted; good defaults; interactive | Large bundle (~600KB) |
-| **Cytoscape.js** | Purpose-built for graphs; fast; DAGRE layout | More complex API |
-| **D3.js** | Maximum flexibility | Requires significant custom code |
-| **Mermaid.js** | Simple DSL; easy static diagrams | Poor for interactive exploration |
+| Library              | Strength                                     | Weakness                         |
+|----------------------|----------------------------------------------|----------------------------------|
+| **vis.js Network**   | Already adopted; good defaults; interactive  | Large bundle (~600KB)            |
+| **Cytoscape.js**     | Purpose-built for graphs; fast; DAGRE layout | More complex API                 |
+| **D3.js**            | Maximum flexibility                          | Requires significant custom code |
+| **Mermaid.js**       | Simple DSL; easy static diagrams             | Poor for interactive exploration |
 
 **Recommendation**: Keep vis.js for interactive graph views. Add Mermaid.js as a secondary
 simple tree renderer for lightweight dependency summary views.
@@ -612,6 +612,7 @@ simple tree renderer for lightweight dependency summary views.
 ### New endpoint: `/iics/graph`
 
 New `graph.xqm` serving a single-page graph explorer:
+
 - Loads vis.js + `iics-reporting.js` additions
 - Fetches graph data from `/iics/api/design/dependencies?database=X&guid=Y`
 - Controls: layout toggle (hierarchical ↔ network), zoom, highlight path to root
@@ -620,6 +621,7 @@ New `graph.xqm` serving a single-page graph explorer:
 ### UI Changes to `design_detail.xqm`
 
 Add a 4th tab "Dependency Graph" to the existing tabs:
+
 - Renders `<div id="dep-graph" style="height:500px">` via vis.js
 - Async data load via `fetch('/iics/api/design/dependencies?...')` 
 - No page reload needed — graph data comes from the JSON API
@@ -649,14 +651,14 @@ The `databases.xqm` list page and REST API both read from it for fast asset enum
 
 ## Implementation Priority / Phasing
 
-| Phase | Status | Priority | Effort | Value |
-|-------|--------|----------|--------|-------|
-| 1 - Nested ZIP extraction | DONE (c86754e) | HIGH | Medium | Unlocks CDI |
-| 2 - CDI metadata module | DONE (c86754e) | MEDIUM | High | New asset type support |
-| 3 - Dependency cache | PENDING | HIGH | Medium | Performance fix for existing pages |
-| 4 - REST API (`api.xqm`) | PENDING | HIGH | Medium | Foundation for graph UI |
-| 5 - vis.js graph view | PENDING | MEDIUM | Medium | UX improvement |
-| 6 - Unified catalogue | PENDING | LOW | Low | Polish |
+| Phase                     | St  atus       | Priority | Effort | Value                              |
+|---------------------------|----------------|----------|--------|------------------------------------|
+| 1 - Nested ZIP extraction | DONE (c86754e) | HIGH     | Medium | Unlocks CDI                        |
+| 2 - CDI metadata module   | DONE (c86754e) | MEDIUM   | High   | New asset type support             |
+| 3 - Dependency cache      | PENDING        | HIGH     | Medium | Performance fix for existing pages |
+| 4 - REST API (`api.xqm`)  | PENDING        | HIGH     | Medium | Foundation for graph UI            |
+| 5 - vis.js graph view     | PENDING        | MEDIUM   | Medium | UX improvement                     |
+| 6 - Unified catalogue     | PENDING        | LOW      | Low    | Polish                             |
 
 ---
 

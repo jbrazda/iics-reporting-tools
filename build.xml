@@ -99,6 +99,11 @@
         <condition property="available.basexhttpstop" value="true" else="false">
             <available filepath="${PATH.basex}" file="basexhttpstop${exec.ext}" property="basexhttpstop.present" />
         </condition>
+        
+        <condition property="basex.installed" value="true" else="false">
+            <available file="${basex.home}/bin/basex${exec.ext}" property="basex.installed"/>
+        </condition>
+        
 
         <property name="initialized" value="true" />
     </target>
@@ -200,9 +205,14 @@
     </target>
 
     <target name="basex.install" depends="basex.download" 
-    	unless="${available.basex}" description="Installs BaseX DB and Tools">
+    	unless="${basex.installed}" description="Installs BaseX DB and Tools">
         <mkdir dir="${basex.home}"/>
-        <unzip dest="${basex.home}/.." overwrite="true" src="${basex.downloads.dir}/${basex.download.file}">
+        <unzip dest="${basex.home}" overwrite="true" src="${basex.downloads.dir}/${basex.download.file}">
+            <patternset>
+                <include name="basex/**" />
+            </patternset>
+            <!-- Strip the leading "basex/" from each entry -->
+            <mapper type="regexp" from="^basex/(.*)$" to="\1"/>
         </unzip>
         <chmod perm="ugo+rx">
             <fileset dir="${basex.home}/bin">

@@ -55,7 +55,7 @@ It can be plugged-in into the automated Build process to Publish And  make onlin
 ### Pre-requisites
 
 - JAVA JRE 1.8 or newer
-- Apache Ant 1.9 or newer
+- Apache Ant 1.10 or newer
 
 > Note: By default BaseX runtime would be installed in the `/opt/java/library/basex` folder on Mac or Linux you have to create java folder and grant permissions to it as follows. You can set location to a different folder if desired in step 2 of the installation guide
 
