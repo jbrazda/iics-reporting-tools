@@ -21,26 +21,26 @@ Full asset type list from the
 
 ### Data Integration (CDI) Asset Types
 
-| API Type | Display Name | Nested ZIP Extension | JSON file | Support Status |
-|----------|-------------|---------------------|-----------|----------------|
-| `DTEMPLATE` | Mapping | `.DTEMPLATE.zip` | `mappingTemplate.json` | SUPPORTED |
-| `MTT` | Mapping Task | `.MTT.zip` | `mtTask.json` | SUPPORTED |
-| `DSS` | Synchronization Task | `.DSS.zip` | (not verified) | INDEXED only |
-| `DMASK` | Masking Task | `.DMASK.zip` | (not verified) | INDEXED only |
-| `DRS` | Replication Task | `.DRS.zip` | (not verified) | INDEXED only |
-| `DMAPPLET` | Mapplet (Data Integration) | `.DMAPPLET.zip` | (not verified) | INDEXED only |
-| `MAPPLET` | PowerCenter Mapplet | `.MAPPLET.zip` | `mappingTemplate.json` | INDEXED only |
-| `BSERVICE` | Business Service | `.BSERVICE.zip` | `businessService.json` | INDEXED only |
-| `HSCHEMA` | Hierarchical Schema | `.HSCHEMA.zip` | `hschema.json` | INDEXED only |
-| `PCS` | PowerCenter Task | `.PCS.zip` | (not verified) | INDEXED only |
-| `FWCONFIG` | Fixed Width Configuration | `.FWCONFIG.zip` | `fwConfig.json` | INDEXED only |
-| `CUSTOMSOURCE` | Saved Query | `.CUSTOMSOURCE.zip` | (not verified) | INDEXED only |
-| `MI_TASK` | Mass Ingestion Task | `.MI_TASK.zip` | (not verified) | INDEXED only |
-| `WORKFLOW` | Linear Taskflow | `.WORKFLOW.zip` | (not verified) | INDEXED only |
-| `TASKFLOW` | Taskflow | `.TASKFLOW.zip` | (not verified) | INDEXED only |
-| `UDF` | User-Defined Function | `.UDF.zip` | (not verified) | INDEXED only |
-| `Connection` | CDI Connection | `.Connection.zip` | `connection.json` | SUPPORTED |
-| `AgentGroup` | Secure Agent Group | `.AgentGroup.zip` | `runtimeEnvironment.json` | INDEXED only |
+| API Type       | Display Name               | Nested ZIP Extension | JSON file                 | Support Status |
+|----------------|----------------------------|----------------------|---------------------------|----------------|
+| `DTEMPLATE`    | Mapping                    | `.DTEMPLATE.zip`     | `mappingTemplate.json`    | SUPPORTED      |
+| `MTT`          | Mapping Task               | `.MTT.zip`           | `mtTask.json`             | SUPPORTED      |
+| `DSS`          | Synchronization Task       | `.DSS.zip`           | (not verified)            | INDEXED only   |
+| `DMASK`        | Masking Task               | `.DMASK.zip`         | (not verified)            | INDEXED only   |
+| `DRS`          | Replication Task           | `.DRS.zip`           | (not verified)            | INDEXED only   |
+| `DMAPPLET`     | Mapplet (Data Integration) | `.DMAPPLET.zip`      | (not verified)            | INDEXED only   |
+| `MAPPLET`      | PowerCenter Mapplet        | `.MAPPLET.zip`       | `mappingTemplate.json`    | INDEXED only   |
+| `BSERVICE`     | Business Service           | `.BSERVICE.zip`      | `businessService.json`    | INDEXED only   |
+| `HSCHEMA`      | Hierarchical Schema        | `.HSCHEMA.zip`       | `hschema.json`            | INDEXED only   |
+| `PCS`          | PowerCenter Task           | `.PCS.zip`           | (not verified)            | INDEXED only   |
+| `FWCONFIG`     | Fixed Width Configuration  | `.FWCONFIG.zip`      | `fwConfig.json`           | INDEXED only   |
+| `CUSTOMSOURCE` | Saved Query                | `.CUSTOMSOURCE.zip`  | (not verified)            | INDEXED only   |
+| `MI_TASK`      | Mass Ingestion Task        | `.MI_TASK.zip`       | (not verified)            | INDEXED only   |
+| `WORKFLOW`     | Linear Taskflow            | `.WORKFLOW.zip`      | (not verified)            | INDEXED only   |
+| `TASKFLOW`     | Taskflow                   | `.TASKFLOW.zip`      | (not verified)            | INDEXED only   |
+| `UDF`          | User-Defined Function      | `.UDF.zip`           | (not verified)            | INDEXED only   |
+| `Connection`   | CDI Connection             | `.Connection.zip`    | `connection.json`         | SUPPORTED      |
+| `AgentGroup`   | Secure Agent Group         | `.AgentGroup.zip`    | `runtimeEnvironment.json` | INDEXED only   |
 
 > "INDEXED only" means `cdi:index-nested-zip` stores the JSON as binary in the DB,
 > but no query functions or UI tables exist for those types yet.
@@ -49,22 +49,22 @@ Full asset type list from the
 
 ### Application Integration (CAI) Asset Types
 
-| API Type | Display Name | MIME Type | XML Extension | Support Status |
-|----------|-------------|-----------|---------------|----------------|
-| `PROCESS` | Process | `application/xml+process` | `.PROCESS.xml` | SUPPORTED |
-| `GUIDE` | Guide (Screenflow) | `application/xml+screenflow` | `.GUIDE.xml` | SUPPORTED |
-| `AI_CONNECTION` | Connection | `application/xml+connection` | `.AI_CONNECTION.xml` | SUPPORTED |
-| `AI_SERVICE_CONNECTOR` | Service Connector | `application/xml+businesssconnector` | `.AI_SERVICE_CONNECTOR.xml` | SUPPORTED |
-| `PROCESS_OBJECT` | Process Object | `application/xml+processobject` | `.PROCESS_OBJECT.xml` | SUPPORTED |
-| `TASKFLOW` | Task Flow | `application/xml+taskflow` | `.TASKFLOW.xml` | SUPPORTED |
+| API Type               | Display Name       | MIME Type                            | XML Extension               | Support Status |
+|------------------------|--------------------|--------------------------------------|-----------------------------|----------------|
+| `PROCESS`              | Process            | `application/xml+process`            | `.PROCESS.xml`              | SUPPORTED      |
+| `GUIDE`                | Guide (Screenflow) | `application/xml+screenflow`         | `.GUIDE.xml`                | SUPPORTED      |
+| `AI_CONNECTION`        | Connection         | `application/xml+connection`         | `.AI_CONNECTION.xml`        | SUPPORTED      |
+| `AI_SERVICE_CONNECTOR` | Service Connector  | `application/xml+businesssconnector` | `.AI_SERVICE_CONNECTOR.xml` | SUPPORTED      |
+| `PROCESS_OBJECT`       | Process Object     | `application/xml+processobject`      | `.PROCESS_OBJECT.xml`       | SUPPORTED      |
+| `TASKFLOW`             | Task Flow          | `application/xml+taskflow`           | `.TASKFLOW.xml`             | SUPPORTED      |
 
 ### B2B Gateway Asset Types
 
-| API Type | Display Name | Format | Support Status |
-|----------|-------------|--------|----------------|
-| `B2BGW_CUSTOMER` | B2B Customer | Nested ZIP | NOT SUPPORTED |
-| `B2BGW_SUPPLIER` | B2B Supplier | Nested ZIP | NOT SUPPORTED |
-| `B2BGW_MONITOR` | B2B Monitor | Unknown | NOT SUPPORTED |
+| API Type         | Display Name | Format     | Support Status |
+|------------------|--------------|------------|----------------|
+| `B2BGW_CUSTOMER` | B2B Customer | Nested ZIP | NOT SUPPORTED  |
+| `B2BGW_SUPPLIER` | B2B Supplier | Nested ZIP | NOT SUPPORTED  |
+| `B2BGW_MONITOR`  | B2B Monitor  | Unknown    | NOT SUPPORTED  |
 
 ### Other Asset Types (MDM, Data Quality, Profiling)
 
@@ -84,24 +84,24 @@ Primary test package for CDI functionality:
 
 ### Package Contents (NATL_ClaimCenter_GW.zip - verified 2026-03-30)
 
-| Category | Count | Notes |
-|----------|-------|-------|
-| Total entries | 547 | - |
-| XML documents | 364 | CAI assets (Processes, Guides, Connections, etc.) |
-| Nested ZIPs | 73 | CDI assets (see breakdown below) |
-| Top-level JSON | 1 | `exportMetadata.v2.json` only |
+| Category       | Count | Notes                                             |
+|----------------|-------|---------------------------------------------------|
+| Total entries  | 547   | -                                                 |
+| XML documents  | 364   | CAI assets (Processes, Guides, Connections, etc.) |
+| Nested ZIPs    | 73    | CDI assets (see breakdown below)                  |
+| Top-level JSON | 1     | `exportMetadata.v2.json` only                     |
 
 Nested ZIP breakdown by type:
 
-| Extension | Count | JSON file inside | Asset type |
-|-----------|-------|-----------------|------------|
-| `.DTEMPLATE.zip` | 25 | `mappingTemplate.json` | CDI Mapping Template |
-| `.MTT.zip` | 23 | `mtTask.json` | CDI Mapping Task |
-| `.Connection.zip` | 17 | `connection.json` | CDI Connection |
-| `.BSERVICE.zip` | 4 | `businessService.json` | CDI Business Service |
-| `.FWCONFIG.zip` | 2 | `fwConfig.json` | CDI Format/Framework Config |
-| `.HSCHEMA.zip` | 1 | `hschema.json` | CDI Hierarchical Schema |
-| `.AgentGroup.zip` | 1 | `runtimeEnvironment.json` | Secure Agent Group |
+| Extension         | Count | JSON file inside          | Asset type                  |
+|-------------------|-------|---------------------------|-----------------------------|
+| `.DTEMPLATE.zip`  | 25    | `mappingTemplate.json`    | CDI Mapping Template        |
+| `.MTT.zip`        | 23    | `mtTask.json`             | CDI Mapping Task            |
+| `.Connection.zip` | 17    | `connection.json`         | CDI Connection              |
+| `.BSERVICE.zip`   | 4     | `businessService.json`    | CDI Business Service        |
+| `.FWCONFIG.zip`   | 2     | `fwConfig.json`           | CDI Format/Framework Config |
+| `.HSCHEMA.zip`    | 1     | `hschema.json`            | CDI Hierarchical Schema     |
+| `.AgentGroup.zip` | 1     | `runtimeEnvironment.json` | Secure Agent Group          |
 
 Folder structure (top-level projects under `Explore/`):
 `ClaimCenter_GW`, `PerceptiveContent`, `Connections`, `Esignature`, `DAS`, `Connectors`,
@@ -127,7 +127,7 @@ In BaseX XQuery Update, all pending updates are applied at the end of the transa
 `db:store` internally calls `db:open` during evaluation - but the database does not
 exist yet (it is only in the pending update list). This causes a silent failure:
 
-```
+```text
 [db:open] Database '...' was not found.
 ```
 
@@ -142,14 +142,14 @@ by the upload handler. The background job reads from the filesystem ZIP, not the
 See [IICS Asset Type Reference](#iics-asset-type-reference) for the full type list.
 Key types verified in surveyed packages:
 
-| API Type | Nested ZIP extension | JSON file inside |
-|---------|---------------------|-----------------|
-| `DTEMPLATE` | `.DTEMPLATE.zip` | `mappingTemplate.json` |
-| `MTT` | `.MTT.zip` | `mtTask.json` |
-| `Connection` | `.Connection.zip` | `connection.json` |
-| `BSERVICE` | `.BSERVICE.zip` | `businessService.json` |
-| `FWCONFIG` | `.FWCONFIG.zip` | `fwConfig.json` |
-| `HSCHEMA` | `.HSCHEMA.zip` | `hschema.json` |
+| API Type     | Nested ZIP extension | JSON file inside       |
+|--------------|----------------------|------------------------|
+| `DTEMPLATE`  | `.DTEMPLATE.zip`     | `mappingTemplate.json` |
+| `MTT`        | `.MTT.zip`           | `mtTask.json`          |
+| `Connection` | `.Connection.zip`    | `connection.json`      |
+| `BSERVICE`   | `.BSERVICE.zip`      | `businessService.json` |
+| `FWCONFIG`   | `.FWCONFIG.zip`      | `fwConfig.json`        |
+| `HSCHEMA`    | `.HSCHEMA.zip`       | `hschema.json`         |
 
 No standalone CDI Taskflow nested ZIPs were found in the surveyed packages.
 CAI Taskflows remain as `.TASKFLOW.xml` files in the top-level ZIP.
@@ -159,6 +159,7 @@ CAI Taskflows remain as `.TASKFLOW.xml` files in the top-level ZIP.
 ### Bug 3 - Top-level JSON files not indexed
 
 Packages contain useful JSON at the top level that is currently ignored:
+
 - `exportMetadata.v2.json` - maps `objectGuid` (federatedId) to `objectName` and `objectType`
 - `*.Folder.json` - folder metadata
 
@@ -222,21 +223,21 @@ Packages contain useful JSON at the top level that is currently ignored:
 
 ## Current State Summary
 
-| Area | Previous | Current | Gap |
-|------|---------|---------|-----|
-| Upload | Extracts `.xml` from top-level ZIP only | XML + nested ZIP JSON extracted in background job | - |
-| CDI extraction | Not supported | `cdi:extract-from-package` indexes JSON as binary, XML as docs | - |
-| CDI metadata | Not supported | `cdi-metadata.xqm` queries mappings, tasks, connections | Cross-package federatedId resolution |
-| CDI HTML | Not supported | `cdi-metadata-html.xqm` renders Mappings/Tasks/Connections tables | Detail pages not yet wired |
-| Dependency traversal | Recursive on every page load - expensive | Still recursive | Phase 3 cache needed |
-| API | All endpoints return HTML only | Still HTML only | Phase 4 |
-| Visualization | DataTables + jQuery UI tabs | Same | Phase 5 |
+| Area                 | Previous                                 | Current                                                           | Gap                                  |
+|----------------------|------------------------------------------|-------------------------------------------------------------------|--------------------------------------|
+| Upload               | Extracts `.xml` from top-level ZIP only  | XML + nested ZIP JSON extracted in background job                 | -                                    |
+| CDI extraction       | Not supported                            | `cdi:extract-from-package` indexes JSON as binary, XML as docs    | -                                    |
+| CDI metadata         | Not supported                            | `cdi-metadata.xqm` queries mappings, tasks, connections           | Cross-package federatedId resolution |
+| CDI HTML             | Not supported                            | `cdi-metadata-html.xqm` renders Mappings/Tasks/Connections tables | Detail pages not yet wired           |
+| Dependency traversal | Recursive on every page load - expensive | Still recursive                                                   | Phase 3 cache needed                 |
+| API                  | All endpoints return HTML only           | Still HTML only                                                   | Phase 4                              |
+| Visualization        | DataTables + jQuery UI tabs              | Same                                                              | Phase 5                              |
 
 ---
 
 ## Architecture Overview (implemented)
 
-```
+```text
 Upload ZIP
    |
    +-- iics:create-db-from-zip (Transaction 1 - sync) [IMPLEMENTED]
@@ -335,16 +336,16 @@ Verified from CI-CD-Demo and NATL_ClaimCenter_GW packages. See the
 [IICS Asset Type Reference](#iics-asset-type-reference) table above for the complete
 official API type list.
 
-| Asset type | API Type | Nested ZIP extension | JSON file inside | In NATL package |
-|-----------|---------|---------------------|-----------------|-----------------|
-| Mapping Template | `DTEMPLATE` | `.DTEMPLATE.zip` | `mappingTemplate.json` | 25 |
-| Mapping Task | `MTT` | `.MTT.zip` | `mtTask.json` | 23 |
-| Connection | `Connection` | `.Connection.zip` | `connection.json` | 17 |
-| Business Service | `BSERVICE` | `.BSERVICE.zip` | `businessService.json` | 4 |
-| Fixed Width Config | `FWCONFIG` | `.FWCONFIG.zip` | `fwConfig.json` | 2 |
-| Hierarchical Schema | `HSCHEMA` | `.HSCHEMA.zip` | `hschema.json` | 1 |
-| Secure Agent Group | `AgentGroup` | `.AgentGroup.zip` | `runtimeEnvironment.json` | 1 |
-| PC Mapplet | `MAPPLET` | `.MAPPLET.zip` | `mappingTemplate.json` | 0 |
+| Asset type          | API Type     | Nested ZIP extension | JSON file inside          | In NATL package |
+|---------------------|--------------|----------------------|---------------------------|-----------------|
+| Mapping Template    | `DTEMPLATE`  | `.DTEMPLATE.zip`     | `mappingTemplate.json`    | 25              |
+| Mapping Task        | `MTT`        | `.MTT.zip`           | `mtTask.json`             | 23              |
+| Connection          | `Connection` | `.Connection.zip`    | `connection.json`         | 17              |
+| Business Service    | `BSERVICE`   | `.BSERVICE.zip`      | `businessService.json`    | 4               |
+| Fixed Width Config  | `FWCONFIG`   | `.FWCONFIG.zip`      | `fwConfig.json`           | 2               |
+| Hierarchical Schema | `HSCHEMA`    | `.HSCHEMA.zip`       | `hschema.json`            | 1               |
+| Secure Agent Group  | `AgentGroup` | `.AgentGroup.zip`    | `runtimeEnvironment.json` | 1               |
+| PC Mapplet          | `MAPPLET`    | `.MAPPLET.zip`       | `mappingTemplate.json`    | 0               |
 
 No standalone CDI Taskflow nested ZIPs found in any surveyed package.
 CAI Taskflows remain as `.TASKFLOW.xml` in the top-level ZIP.
@@ -402,10 +403,10 @@ for $p in $t?parameters?*
 
 ### CDI Dependency types (implemented)
 
-| From | Depends On | Dependency Type |
-|------|-----------|-----------------|
-| Mapping | Connection (via `references[refType=connection]`) | `connectionReference` |
-| Mapping Task | Mapping (via `mappingId`) | `mappingReference` |
+| From         | Depends On                                                           | Dependency Type                         |
+|--------------|----------------------------------------------------------------------|-----------------------------------------|
+| Mapping      | Connection (via `references[refType=connection]`)                    | `connectionReference`                   |
+| Mapping Task | Mapping (via `mappingId`)                                            | `mappingReference`                      |
 | Mapping Task | Connection (via `parameters[sourceConnectionId/targetConnectionId]`) | `sourceConnection` / `targetConnection` |
 
 ### HTML rendering (`cdi-metadata-html.xqm`)
@@ -420,7 +421,7 @@ Detail functions `chtml:MappingDetail` and `chtml:TaskDetail` use name-based loo
 
 ### Verification (CI-CD-Demo_2021-04-07-172924_a5f9150d.zip)
 
-```
+```text
 XML docs: 4
 Binary (JSON) resources: 13
   - mappingTemplate.json -> m_SFDC_FF_Accounts (1 mapping)
@@ -431,7 +432,7 @@ Dependencies resolved: m_SFDC_FF_Accounts -> [FF_NA_Staging_Salesforce, Salesfor
 
 ### Expected results for NATL_ClaimCenter_GW.zip (pending upload test)
 
-```
+```text
 XML docs: 364
 Binary (JSON) resources: 73+ (one per nested ZIP entry, plus top-level exportMetadata.v2.json)
 CDI assets expected:
@@ -476,6 +477,7 @@ To run the extraction test directly on the Linux server:
 ## Phase 3 - Dependency Graph Cache [PENDING]
 
 ### Problem
+
 `imf:getObjectDependencies()` and `imf:getObjectImpact()` perform full recursive traversal
 on every page load. For large databases (100s of designs) this causes timeouts and poor UX.
 
@@ -486,7 +488,7 @@ dependency and impact trees and store them as JSON in `_cache/` paths.
 
 ### Cache Storage Format
 
-```
+```text
 _cache/
   deps/{guid}.json     ← Pre-computed dependency tree as JSON
   impact/{guid}.json   ← Pre-computed impact tree as JSON
@@ -544,18 +546,18 @@ future external consumers.
 
 ### Endpoint Design
 
-| Method | Path | Returns |
-|--------|------|---------|
-| GET | `/iics/api/databases` | `[{name, resources, modified}]` |
-| GET | `/iics/api/designs?database=X` | `[{guid, name, displayName, type, status}]` |
-| GET | `/iics/api/design?database=X&guid=Y` | `{guid, name, type, mimeType, ...}` |
-| GET | `/iics/api/design/dependencies?database=X&guid=Y` | `{nodes:[...], edges:[...]}` (vis.js format) |
-| GET | `/iics/api/design/impact?database=X&guid=Y` | `{nodes:[...], edges:[...]}` (vis.js format) |
-| GET | `/iics/api/cache/status?database=X` | `{complete, built, count}` |
-| POST | `/iics/api/cache/rebuild?database=X` | `{jobId}` (triggers background job) |
-| GET | `/iics/api/cdi/mappings?database=X` | CDI mapping list |
-| GET | `/iics/api/cdi/tasks?database=X` | CDI task list |
-| GET | `/iics/api/cdi/taskflows?database=X` | CDI taskflow list |
+| Method | Path                                              | Returns                                      |
+|--------|---------------------------------------------------|----------------------------------------------|
+| GET    | `/iics/api/databases`                             | `[{name, resources, modified}]`              |
+| GET    | `/iics/api/designs?database=X`                    | `[{guid, name, displayName, type, status}]`  |
+| GET    | `/iics/api/design?database=X&guid=Y`              | `{guid, name, type, mimeType, ...}`          |
+| GET    | `/iics/api/design/dependencies?database=X&guid=Y` | `{nodes:[...], edges:[...]}` (vis.js format) |
+| GET    | `/iics/api/design/impact?database=X&guid=Y`       | `{nodes:[...], edges:[...]}` (vis.js format) |
+| GET    | `/iics/api/cache/status?database=X`               | `{complete, built, count}`                   |
+| POST   | `/iics/api/cache/rebuild?database=X`              | `{jobId}` (triggers background job)          |
+| GET    | `/iics/api/cdi/mappings?database=X`               | CDI mapping list                             |
+| GET    | `/iics/api/cdi/tasks?database=X`                  | CDI task list                                |
+| GET    | `/iics/api/cdi/taskflows?database=X`              | CDI taskflow list                            |
 
 ### Response Format for Graph Endpoints
 
@@ -593,6 +595,7 @@ function api:dependencies($db as xs:string, $guid as xs:string) {
 ### Recommendation: vis.js Network (already chosen)
 
 The project already has `sample-data/graph-vis/basic.html` with vis.js. This is the right choice:
+
 - **vis.js Network**: ideal for dependency graphs (directed graphs with arrows, groups, clustering)
 - **Layout options**: `hierarchical` for dependency tree top-down; `force-directed` for full network
 - Already used in the project's prototype
@@ -675,18 +678,21 @@ The `databases.xqm` list page and REST API both read from it for fast asset enum
 - Serialize to JSON: `serialize($data, map{'method':'json'})`
 
 ### BaseX Background Jobs
+
 - `jobs:eval($query, $bindings, $options)` → returns job ID
 - `jobs:finished($id)` → check completion
 - Jobs run in separate transactions — database writes need `%updating`
 - Use `jobs:result($id)` to retrieve results if needed
 
 ### BaseX RESTXQ JSON Response
+
 - `%output:method("text")` + `%output:media-type("application/json")`
 - Or use BaseX's `%output:method("json")` with serialization parameters
 
 ### Dependency Graph → vis.js Conversion
 
 Convert the existing XML dependency structure to vis.js nodes/edges:
+
 ```xquery
 declare function cache:to-vis-graph($deps as element()) as map(*) {
   let $nodes := map:merge((
@@ -712,11 +718,11 @@ declare function cache:to-vis-graph($deps as element()) as map(*) {
 
 ## Todos
 
-| ID | Phase | Status |
-|----|-------|--------|
-| p1-extract | Phase 1 - Nested ZIP extraction | DONE |
-| p2-cdi-module | Phase 2 - CDI metadata module | DONE |
-| p3-cache | Phase 3 - Dependency cache (`modules/cache.xqm`) | PENDING |
-| p4-api | Phase 4 - JSON REST API layer (`api.xqm`) | PENDING |
-| p5-vis | Phase 5 - vis.js graph visualization (`graph.xqm`) | PENDING |
-| p6-catalogue | Phase 6 - Unified CAI+CDI asset catalogue | PENDING |
+| ID            | Phase                                              | Status  |
+|---------------|----------------------------------------------------|---------|
+| p1-extract    | Phase 1 - Nested ZIP extraction                    | DONE    |
+| p2-cdi-module | Phase 2 - CDI metadata module                      | DONE    |
+| p3-cache      | Phase 3 - Dependency cache (`modules/cache.xqm`)   | PENDING |
+| p4-api        | Phase 4 - JSON REST API layer (`api.xqm`)          | PENDING |
+| p5-vis        | Phase 5 - vis.js graph visualization (`graph.xqm`) | PENDING |
+| p6-catalogue  | Phase 6 - Unified CAI+CDI asset catalogue          | PENDING |
